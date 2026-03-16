@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Agente — Boyaca Real Estate</title>
+    <link rel="stylesheet" href="../css/panel.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar__header">
+        <div class="sidebar__logo">
+            <img src="../img/logo.png" alt="BRE Logo">
+        </div>
+        <div>
+            <div class="sidebar__title">Boyaca Real Estate</div>
+            <div class="sidebar__subtitle">Panel Agente</div>
+        </div>
+    </div>
+
+    <div class="sidebar__user">
+        <div class="sidebar__user-name"><?php echo htmlspecialchars($_SESSION['nombre']); ?></div>
+        <div class="sidebar__user-role">Agente — <?php echo htmlspecialchars($agente['cargo']); ?></div>
+    </div>
+
+    <div class="sidebar__label">Menú</div>
+    <ul class="sidebar__menu">
+        <li><a class="active" onclick="mostrar('dashboard')"><span class="icon">🏠</span> Dashboard</a></li>
+        <li><a onclick="mostrar('inmuebles')"><span class="icon">🏢</span> Mis Inmuebles</a></li>
+        <li><a onclick="mostrar('reservas')"><span class="icon">📋</span> Mis Reservas</a></li>
+        <li><a onclick="mostrar('billetera')"><span class="icon">💳</span> Mi Billetera</a></li>
+    </ul>
+
+    <div class="sidebar__logout">
+        <a href="../includes/logout.php"><span class="icon">🚪</span> Cerrar Sesión</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="main__header">
+        <h1>Hola, <?php echo htmlspecialchars($agente['nombre']); ?></h1>
+        <p>Este es tu panel de agente. Gestiona tus inmuebles, reservas y billetera.</p>
+    </div>
+
+    <div id="dashboard">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card__icon">🏢</div>
+                <div class="stat-card__number"><?php echo $mis_inmuebles; ?></div>
+                <div class="stat-card__label">Mis Inmuebles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">📋</div>
+                <div class="stat-card__number"><?php echo $mis_reservas; ?></div>
+                <div class="stat-card__label">Reservas Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">💰</div>
+                <div class="stat-card__number"><?php echo $mis_ventas; ?></div>
+                <div class="stat-card__label">Ventas Realizadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">💳</div>
+                <div class="stat-card__number">$<?php echo $billetera ? number_format($billetera['saldo'], 0, ',', '.') : '0'; ?></div>
+                <div class="stat-card__label">Saldo Billetera</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mis Inmuebles — Catálogo -->
+    <div id="inmuebles" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Mis Inmuebles Asignados</h3>
+            </div>
+            <?php
+            $iconos_tipo = [
+                'casa' => '🏠', 'apartamento' => '🏢', 'oficina' => '🏛️',
+                'local' => '🏪', 'lote' => '📐', 'bodega' => '🏭'
+            ];
+            ?>
+            <div class="catalog-grid">
+                <?php
+                if ($inmuebles && mysqli_num_rows($inmuebles) > 0):
+                    mysqli_data_seek($inmuebles, 0);
+                    while ($im = mysqli_fetch_assoc($inmuebles)):
+                        $icono = $iconos_tipo[$im['tipo']] ?? '🏠';
+                        $tipo_op = $im['tipo_operacion'] ?? 'venta';
+                        $precio = $im['precio_pub'] ?? $im['precio'];
+                ?>
+                <article class="catalog-card">
+                    <div class="catalog-card__image">
+                        <?php echo $icono; ?>
+                        <span class="catalog-card__badge catalog-card__badge--<?php echo $tipo_op; ?>">
+                            <?php echo ucfirst($tipo_op); ?>
+                        </span>
+                    </div>
+                    <div class="catalog-card__body">
+                        <div class="catalog-card__type"><?php echo ucfirst($im['tipo']); ?></div>
+                        <h3 class="catalog-card__title"><?php echo htmlspecialchars($im['descripcion']); ?></h3>
+                        <div class="catalog-card__location">
+                            📍 <?php echo htmlspecialchars($im['direccion']); ?>
+                        </div>
+                        <div class="catalog-card__features">
+                            <?php if ($im['habitaciones'] > 0): ?>
+                            <span class="catalog-card__feature">🛏️ <?php echo $im['habitaciones']; ?> Hab.</span>
+                            <?php endif; ?>
+                            <?php if ($im['banos'] > 0): ?>
+                            <span class="catalog-card__feature">🚿 <?php echo $im['banos']; ?> Baños</span>
+                            <?php endif; ?>
+                            <span class="catalog-card__feature">📐 <?php echo $im['area_m2']; ?> m²</span>
+                            <?php if ($im['estrato'] > 0): ?>
+                            <span class="catalog-card__feature">⭐ Estrato <?php echo $im['estrato']; ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="catalog-card__price">
+                            $<?php echo number_format($precio, 0, ',', '.'); ?>
+                            <?php if ($tipo_op === 'arriendo'): ?>
+                            <small>/mes</small>
+                            <?php endif; ?>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <span class="badge badge--<?php echo $im['estado'] == 'disponible' ? 'success' : 'warning'; ?>">
+                                <?php echo ucfirst($im['estado']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </article>
+                <?php endwhile; else: ?>
+                <p style="text-align:center; color:#607050; grid-column:1/-1; padding:40px;">No tienes inmuebles asignados</p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservas -->
+    <div id="reservas" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Mis Reservas</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Cliente</th><th>Teléfono</th><th>Inmueble</th><th>Estado</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    <?php if ($reservas && mysqli_num_rows($reservas) > 0): ?>
+                    <?php while ($r = mysqli_fetch_assoc($reservas)): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($r['cliente_nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($r['cliente_tel']); ?></td>
+                        <td><?php echo ucfirst($r['tipo_inmueble']) . ' - ' . htmlspecialchars($r['direccion']); ?></td>
+                        <td><span class="badge badge--<?php echo match($r['estado']) { 'pendiente' => 'warning', 'confirmada' => 'success', 'cancelada' => 'danger', default => 'info' }; ?>"><?php echo ucfirst($r['estado']); ?></span></td>
+                        <td><?php echo date('d/m/Y', strtotime($r['fecha_reserva'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No tienes reservas asignadas</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Billetera -->
+    <div id="billetera" style="display:none;">
+        <div class="stats-grid" style="margin-bottom:24px;">
+            <div class="stat-card">
+                <div class="stat-card__icon">💰</div>
+                <div class="stat-card__number">$<?php echo $billetera ? number_format($billetera['saldo'], 0, ',', '.') : '0'; ?></div>
+                <div class="stat-card__label">Saldo Disponible</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">✅</div>
+                <div class="stat-card__number"><?php echo $billetera ? ucfirst($billetera['estado']) : 'N/A'; ?></div>
+                <div class="stat-card__label">Estado</div>
+            </div>
+        </div>
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Últimos Movimientos</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Tipo</th><th>Monto</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    <?php if ($movimientos && mysqli_num_rows($movimientos) > 0): ?>
+                    <?php while ($m = mysqli_fetch_assoc($movimientos)): ?>
+                    <tr>
+                        <td><span class="badge badge--<?php echo $m['tipo'] == 'comision' ? 'success' : ($m['tipo'] == 'bonificacion' ? 'info' : 'warning'); ?>"><?php echo ucfirst(str_replace('_', ' ', $m['tipo'])); ?></span></td>
+                        <td>$<?php echo number_format($m['monto'], 0, ',', '.'); ?></td>
+                        <td><?php echo date('d/m/Y H:i', strtotime($m['fecha'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="3" style="text-align:center; color:#607050; padding:40px;">Sin movimientos registrados</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+function mostrar(seccion) {
+    ['dashboard', 'inmuebles', 'reservas', 'billetera'].forEach(s => document.getElementById(s).style.display = 'none');
+    document.getElementById(seccion).style.display = 'block';
+    document.querySelectorAll('.sidebar__menu a').forEach(a => a.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+}
+</script>
+
+</body>
+</html>

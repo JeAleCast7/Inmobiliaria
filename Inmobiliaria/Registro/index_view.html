@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse — Boyaca Real Estate</title>
+    <link rel="stylesheet" href="Estilos.css">
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<div class="form-container">
+    <div class="form-logo">
+        <img src="../img/logo.png" alt="BRE Logo">
+    </div>
+    <h2>Crear Cuenta 📝</h2>
+    <p>Regístrate como cliente en Boyaca Real Estate</p>
+
+    <?php if (isset($_GET['error'])): ?>
+    <div class="mensaje error" style="display:block;">
+        <?php
+    $errores = [
+        'campos' => '⚠️ Completa todos los campos',
+        'email' => '❌ Ese correo ya está registrado',
+        'password' => '⚠️ La contraseña debe tener al menos 6 caracteres',
+        'db' => '❌ Error al registrar. Intenta de nuevo',
+        'no_numerico' => '❌ El documento y teléfono solo deben contener números'
+    ];
+    echo $errores[$_GET['error']] ?? '❌ Error desconocido';
+?>
+    </div>
+    <?php
+endif; ?>
+
+    <form name="registro" action="validar_registro.php" method="POST">
+
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: Juan Esteban Torres" required>
+
+        <label for="tipo_documento">Tipo de documento</label>
+        <select id="tipo_documento" name="tipo_documento" required>
+            <option value="CC">CC (Cédula de ciudadanía)</option>
+            <option value="CE">CE (Cédula de extranjería)</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="CERL">CERL (Cert. de existencia y representación legal)</option>
+        </select>
+
+        <label for="numero_documento">Número de documento</label>
+        <input type="text" id="numero_documento" name="numero_documento" placeholder="Ej: 1020345678" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+
+        <label for="telefono">Teléfono</label>
+        <input type="text" id="telefono" name="telefono" placeholder="Ej: 3105551234" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+
+        <label for="direccion">Dirección</label>
+        <input type="text" id="direccion" name="direccion" placeholder="Calle / Carrera, Ciudad" required>
+
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" placeholder="tu@email.com" required>
+
+        <label for="password">Contraseña <span style="font-size:12px; font-weight:normal; color:#a0b098;">(debe ser mayor a 6 caracteres)</span></label>
+        <div class="password-wrapper">
+            <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                <svg viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+
+        <button class="btn" type="submit" name="registro">Crear mi cuenta</button>
+
+        <div class="form-links">
+            <p>
+                ¿Ya tienes cuenta?
+                <a href="../Login/index.php">Inicia sesión</a>
+            </p>
+            <p>
+                <a href="../index.php" class="link-back">← Volver al inicio</a>
+            </p>
+        </div>
+
+    </form>
+</div>
+
+<script>
+document.forms['registro'].addEventListener('submit', function(e) {
+    const pwd = document.getElementById('password').value;
+    if (pwd.length <= 6) {
+        e.preventDefault();
+        alert('La contraseña debe ser mayor a 6 caracteres.');
+    }
+});
+
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    
+    const svg = btn.querySelector('svg');
+    if (isPassword) {
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    } else {
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+}
+</script>
+
+</body>
+</html>

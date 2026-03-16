@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin — Boyaca Real Estate</title>
+    <link rel="stylesheet" href="../css/panel.css">
+</head>
+<body>
+
+<!-- ═══ Sidebar ═══ -->
+<aside class="sidebar">
+    <div class="sidebar__header">
+        <div class="sidebar__logo">
+            <img src="../img/logo.png" alt="BRE Logo">
+        </div>
+        <div>
+            <div class="sidebar__title">Boyaca Real Estate</div>
+            <div class="sidebar__subtitle">Panel Admin</div>
+        </div>
+    </div>
+
+    <div class="sidebar__user">
+        <div class="sidebar__user-name"><?php echo htmlspecialchars($_SESSION['nombre']); ?></div>
+        <div class="sidebar__user-role">Administrador</div>
+    </div>
+
+    <div class="sidebar__label">Principal</div>
+    <ul class="sidebar__menu">
+        <li><a class="active" onclick="mostrar('dashboard')"><span class="icon">🏠</span> Dashboard</a></li>
+        <li><a onclick="mostrar('agentes')"><span class="icon">👔</span> Agentes</a></li>
+        <li><a onclick="mostrar('clientes')"><span class="icon">👥</span> Clientes</a></li>
+        <li><a onclick="mostrar('inmuebles')"><span class="icon">🏢</span> Inmuebles</a></li>
+    </ul>
+
+    <div class="sidebar__label">Operaciones</div>
+    <ul class="sidebar__menu">
+        <li><a onclick="mostrar('reservas')"><span class="icon">📋</span> Reservas</a></li>
+        <li><a onclick="mostrar('facturas')"><span class="icon">💰</span> Facturas</a></li>
+        <li><a onclick="mostrar('inventario')"><span class="icon">📦</span> Inventario</a></li>
+        <li><a onclick="mostrar('permisos')"><span class="icon">📜</span> Permisos</a></li>
+    </ul>
+
+    <div class="sidebar__logout">
+        <a href="../includes/logout.php"><span class="icon">🚪</span> Cerrar Sesión</a>
+    </div>
+</aside>
+
+<!-- ═══ Main Content ═══ -->
+<main class="main">
+    <div class="main__header">
+        <h1>Panel de Administración</h1>
+        <p>Bienvenido, <?php echo htmlspecialchars($_SESSION['nombre']); ?>. Aquí tienes un resumen general.</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card__icon">👥</div>
+                <div class="stat-card__number"><?php echo $total_clientes; ?></div>
+                <div class="stat-card__label">Clientes Registrados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">👔</div>
+                <div class="stat-card__number"><?php echo $total_agentes; ?></div>
+                <div class="stat-card__label">Agentes Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">🏢</div>
+                <div class="stat-card__number"><?php echo $total_inmuebles; ?></div>
+                <div class="stat-card__label">Total Inmuebles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">✅</div>
+                <div class="stat-card__number"><?php echo $total_disponibles; ?></div>
+                <div class="stat-card__label">Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">📋</div>
+                <div class="stat-card__number"><?php echo $total_reservas; ?></div>
+                <div class="stat-card__label">Reservas Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon">💰</div>
+                <div class="stat-card__number"><?php echo $total_facturas; ?></div>
+                <div class="stat-card__label">Facturas Emitidas</div>
+            </div>
+        </div>
+
+        <!-- Últimos clientes -->
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Últimos Clientes Registrados</h3>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($ultimos_clientes && mysqli_num_rows($ultimos_clientes) > 0): ?>
+                    <?php while ($c = mysqli_fetch_assoc($ultimos_clientes)): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($c['nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($c['tipo_documento'] . ' ' . $c['numero_documento']); ?></td>
+                        <td><?php echo htmlspecialchars($c['email']); ?></td>
+                        <td><?php echo htmlspecialchars($c['telefono']); ?></td>
+                        <td><?php echo date('d/m/Y', strtotime($c['fecha_registro'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay clientes registrados aún</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Últimos inmuebles -->
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Últimos Inmuebles</h3>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Dirección</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Agente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($ultimos_inmuebles && mysqli_num_rows($ultimos_inmuebles) > 0): ?>
+                    <?php while ($i = mysqli_fetch_assoc($ultimos_inmuebles)): ?>
+                    <tr>
+                        <td><?php echo ucfirst($i['tipo']); ?></td>
+                        <td><?php echo htmlspecialchars($i['direccion']); ?></td>
+                        <td>$<?php echo number_format($i['precio'], 0, ',', '.'); ?></td>
+                        <td>
+                            <span class="badge badge--<?php echo $i['estado'] == 'disponible' ? 'success' : ($i['estado'] == 'reservado' ? 'warning' : 'info'); ?>">
+                                <?php echo ucfirst($i['estado']); ?>
+                            </span>
+                        </td>
+                        <td><?php echo htmlspecialchars($i['agente_nombre'] ?? 'Sin asignar'); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay inmuebles registrados</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Últimas reservas -->
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Últimas Reservas</h3>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Inmueble</th>
+                        <th>Estado</th>
+                        <th>Fecha Reserva</th>
+                        <th>Fecha Visita</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($ultimas_reservas && mysqli_num_rows($ultimas_reservas) > 0): ?>
+                    <?php while ($r = mysqli_fetch_assoc($ultimas_reservas)): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($r['cliente_nombre']); ?></td>
+                        <td><?php echo ucfirst($r['tipo_inmueble']) . ' - ' . htmlspecialchars($r['direccion']); ?></td>
+                        <td>
+                            <span class="badge badge--<?php
+                                echo match($r['estado']) {
+                                    'pendiente' => 'warning',
+                                    'confirmada' => 'success',
+                                    'cancelada' => 'danger',
+                                    'finalizada' => 'info',
+                                    default => 'info'
+                                };
+                            ?>">
+                                <?php echo ucfirst($r['estado']); ?>
+                            </span>
+                        </td>
+                        <td><?php echo date('d/m/Y', strtotime($r['fecha_reserva'])); ?></td>
+                        <td><?php echo $r['fecha_visita'] ? date('d/m/Y H:i', strtotime($r['fecha_visita'])) : '—'; ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay reservas aún</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Agentes -->
+    <div id="agentes" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Gestión de Agentes</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Nombre</th><th>Documento</th><th>Email</th><th>Cargo</th><th>Teléfono</th><th>Estado</th></tr></thead>
+                <tbody>
+                    <?php if ($agentes && mysqli_num_rows($agentes) > 0): ?>
+                    <?php while ($a = mysqli_fetch_assoc($agentes)): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($a['nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($a['tipo_documento'] . ' ' . $a['numero_documento']); ?></td>
+                        <td><?php echo htmlspecialchars($a['user_email']); ?></td>
+                        <td><?php echo htmlspecialchars($a['cargo']); ?></td>
+                        <td><?php echo htmlspecialchars($a['telefono']); ?></td>
+                        <td><span class="badge badge--<?php echo $a['activo'] ? 'success' : 'danger'; ?>"><?php echo $a['activo'] ? 'Activo' : 'Inactivo'; ?></span></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="6" style="text-align:center; color:#607050; padding:40px;">No hay agentes registrados</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Clientes -->
+    <div id="clientes" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Gestión de Clientes</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Nombre</th><th>Documento</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    <?php if ($clientes_all && mysqli_num_rows($clientes_all) > 0): ?>
+                    <?php while ($cl = mysqli_fetch_assoc($clientes_all)): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($cl['nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($cl['tipo_documento'] . ' ' . $cl['numero_documento']); ?></td>
+                        <td><?php echo htmlspecialchars($cl['user_email']); ?></td>
+                        <td><?php echo htmlspecialchars($cl['telefono']); ?></td>
+                        <td><?php echo htmlspecialchars($cl['direccion']); ?></td>
+                        <td><?php echo date('d/m/Y', strtotime($cl['fecha_registro'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="6" style="text-align:center; color:#607050; padding:40px;">No hay clientes registrados</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Inmuebles -->
+    <div id="inmuebles" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Gestión de Inmuebles</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Tipo</th><th>Dirección</th><th>Precio</th><th>Área</th><th>Estado</th><th>Agente</th></tr></thead>
+                <tbody>
+                    <?php if ($inmuebles_all && mysqli_num_rows($inmuebles_all) > 0): ?>
+                    <?php while ($im = mysqli_fetch_assoc($inmuebles_all)): ?>
+                    <tr>
+                        <td><?php echo ucfirst($im['tipo']); ?></td>
+                        <td><?php echo htmlspecialchars($im['direccion']); ?></td>
+                        <td>$<?php echo number_format($im['precio'], 0, ',', '.'); ?></td>
+                        <td><?php echo $im['area_m2']; ?> m²</td>
+                        <td><span class="badge badge--<?php echo $im['estado'] == 'disponible' ? 'success' : 'warning'; ?>"><?php echo ucfirst($im['estado']); ?></span></td>
+                        <td><?php echo htmlspecialchars($im['agente_nombre'] ?? 'Sin asignar'); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="6" style="text-align:center; color:#607050; padding:40px;">No hay inmuebles</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Reservas -->
+    <div id="reservas" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Gestión de Reservas</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Cliente</th><th>Inmueble</th><th>Agente</th><th>Estado</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    <?php if ($reservas_all && mysqli_num_rows($reservas_all) > 0): ?>
+                    <?php while ($re = mysqli_fetch_assoc($reservas_all)): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($re['cliente_nombre']); ?></td>
+                        <td><?php echo ucfirst($re['tipo_inmueble']) . ' - ' . htmlspecialchars($re['direccion']); ?></td>
+                        <td><?php echo htmlspecialchars($re['agente_nombre'] ?? '—'); ?></td>
+                        <td><span class="badge badge--<?php echo match($re['estado']) { 'pendiente' => 'warning', 'confirmada' => 'success', 'cancelada' => 'danger', default => 'info' }; ?>"><?php echo ucfirst($re['estado']); ?></span></td>
+                        <td><?php echo date('d/m/Y', strtotime($re['fecha_reserva'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay reservas</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Facturas -->
+    <div id="facturas" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header"><h3 class="panel-section__title">Facturas</h3></div>
+            <table class="data-table">
+                <thead><tr><th>ID</th><th>Cliente</th><th>Tipo</th><th>Valor</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    <?php if ($facturas_all && mysqli_num_rows($facturas_all) > 0): ?>
+                    <?php while ($fa = mysqli_fetch_assoc($facturas_all)): ?>
+                    <tr>
+                        <td>#<?php echo $fa['id_factura']; ?></td>
+                        <td><?php echo htmlspecialchars($fa['cliente_nombre']); ?></td>
+                        <td><?php echo ucfirst($fa['tipo']); ?></td>
+                        <td>$<?php echo number_format($fa['valor_total'], 0, ',', '.'); ?></td>
+                        <td><?php echo date('d/m/Y', strtotime($fa['fecha'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay facturas</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Inventario -->
+    <div id="inventario" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header"><h3 class="panel-section__title">Inventario</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Inmueble</th><th>Tipo Operación</th><th>Precio</th><th>Estado</th><th>Publicación</th></tr></thead>
+                <tbody>
+                    <?php if ($inventario_all && mysqli_num_rows($inventario_all) > 0): ?>
+                    <?php while ($inv = mysqli_fetch_assoc($inventario_all)): ?>
+                    <tr>
+                        <td><?php echo ucfirst($inv['tipo_inmueble']) . ' - ' . htmlspecialchars($inv['direccion']); ?></td>
+                        <td><?php echo ucfirst($inv['tipo']); ?></td>
+                        <td>$<?php echo number_format($inv['precio'], 0, ',', '.'); ?></td>
+                        <td><span class="badge badge--<?php echo $inv['estado'] == 'activo' ? 'success' : 'warning'; ?>"><?php echo ucfirst($inv['estado']); ?></span></td>
+                        <td><?php echo date('d/m/Y', strtotime($inv['fecha_publicacion'])); ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay inventario</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Permisos -->
+    <div id="permisos" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header"><h3 class="panel-section__title">Permisos Gubernamentales</h3></div>
+            <table class="data-table">
+                <thead><tr><th>Inmueble</th><th>Tipo Permiso</th><th>Estado</th><th>Solicitud</th><th>Vencimiento</th></tr></thead>
+                <tbody>
+                    <?php if ($permisos_all && mysqli_num_rows($permisos_all) > 0): ?>
+                    <?php while ($pe = mysqli_fetch_assoc($permisos_all)): ?>
+                    <tr>
+                        <td><?php echo ucfirst($pe['tipo_inmueble']) . ' - ' . htmlspecialchars($pe['direccion']); ?></td>
+                        <td><?php echo htmlspecialchars($pe['tipo_permiso']); ?></td>
+                        <td><span class="badge badge--<?php echo match($pe['estado']) { 'aprobado' => 'success', 'pendiente' => 'warning', 'rechazado' => 'danger', default => 'info' }; ?>"><?php echo ucfirst($pe['estado']); ?></span></td>
+                        <td><?php echo date('d/m/Y', strtotime($pe['fecha_solicitud'])); ?></td>
+                        <td><?php echo $pe['fecha_vencimiento'] ? date('d/m/Y', strtotime($pe['fecha_vencimiento'])) : '—'; ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay permisos registrados</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+function mostrar(seccion) {
+    const secciones = ['dashboard', 'agentes', 'clientes', 'inmuebles', 'reservas', 'facturas', 'inventario', 'permisos'];
+    secciones.forEach(s => {
+        document.getElementById(s).style.display = 'none';
+    });
+    document.getElementById(seccion).style.display = 'block';
+    document.querySelectorAll('.sidebar__menu a').forEach(a => a.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+}
+</script>
+
+</body>
+</html>
