@@ -1,0 +1,76 @@
+===================================================
+GUÍA: CÓMO CORRER ESTE PROYECTO EN OTRA COMPUTADORA
+===================================================
+
+¡Hola! Si tienes esta carpeta en tus manos y quieres que la página web funcione en tu computadora sin tener que instalar lenguajes de programación raros, sigue estos pasos al pie de la letra. ¡Es muy fácil!
+
+---------------------------------------------------
+PASO 1: INSTALAR Y ABRIR REQUERIDAMENTE LA MAGIA (DOCKER)
+---------------------------------------------------
+1. Entra a: https://www.docker.com/products/docker-desktop/
+2. Haz clic en "Download for Windows" (o Mac).
+3. Instálalo como cualquier otro programa.
+4. **¡EL PASO MÁS IMPORTANTE!** Busca "Docker Desktop" en el menú de inicio de tu computadora y HAZ CLIC para abrir el programa.
+5. Espera unos segundos hasta que la esquina inferior izquierda del programa diga "Engine running" en color verde. (Si no haces esto y tratas de correr código, el sistema te dará el error "...failed to connect to the docker API npipe").
+
+---------------------------------------------------
+PASO 2: CONSEGUIR LA BASE DE DATOS VIEJA (SI APLICA)
+---------------------------------------------------
+Si quieres que la página inicie con todos los registros y datos que ya existían:
+1. En la computadora original donde trabajaban con XAMPP, abre el navegador y entra a: http://localhost/phpmyadmin/
+2. A la izquierda, haz clic en la base de datos llamada "inmobiliaria_db".
+3. Arriba, ve a la pestaña que dice "Exportar" y haz clic en el botón de abajo que dice "Continuar". Se descargará un archivo que termina en ".sql" (por ejemplo: "inmobiliaria_db.sql").
+4. Copia ese archivo y pégalo en una USB si lo vas a llevar a otra computadora.
+
+---------------------------------------------------
+PASO 3: ACOMODAR EL ARCHIVO DE DATOS (.SQL)
+---------------------------------------------------
+Ya en la computadora nueva:
+1. Entra a la carpeta principal de este proyecto Inmobiliaria.
+2. Crea una carpeta nueva y ponle exactamente este nombre: db_init
+3. Mete adentro de esa carpeta el archivo ".sql" que descargaste en el Paso 2.
+(Si no quieres datos viejos, sáltate este paso).
+
+---------------------------------------------------
+PASO 4: ¡ATENCIÓN! CAMBIAR UNA SOLA PALABRA EN EL CÓDIGO
+---------------------------------------------------
+Como este código fue hecho para funcionar en la computadora del dueño original, tenemos que decirle que ahora va a funcionar dentro de Docker. 
+
+1. Entra a la carpeta llamada "includes" dentro del proyecto.
+2. Abre el archivo llamado "conexion.php" usando un bloc de notas (Click derecho > Abrir con > Bloc de notas).
+3. Busca la línea que dice:
+   $servidor = "localhost";
+
+4. Bórrala y cámbiala PARA QUE QUEDE EXACTAMENTE ASÍ:
+   $servidor = "db";
+   
+   ¡Ojo! No le borres las comillas ni el punto y coma final.
+5. Dale a Archivo > Guardar, y cierra el bloc de notas.
+
+---------------------------------------------------
+PASO 5: ENCENDER LOS MOTORES (Elige la Opción A o B)
+---------------------------------------------------
+
+**OPCIÓN A: La forma visual y fácil (Directo en Docker Desktop)**
+1. Abre tu programa "Docker Desktop".
+2. Ve a la pestaña de "Containers" (Contenedores) en el menú izquierdo.
+3. Si estás usando una versión reciente de Docker Desktop, notarás que arriba puedes arrastrar y soltar la carpeta completa del proyecto o seleccionar "Add new" -> "Create from docker-compose.yml". Simplemente selecciona el archivo "docker-compose.yml" de la carpeta del proyecto.
+4. Dale al botón de "Play" (iniciar).
+
+**OPCIÓN B: La forma clásica (Usando Terminal)**
+1. Ve a la carpeta principal de este proyecto (donde ves el archivo "docker-compose.yml").
+2. Dale clic derecho a un espacio en blanco y selecciona "Abrir en Terminal" o "PowerShell".
+3. Escribe EXACTAMENTE esto:
+   docker-compose up -d
+   
+4. Presiona "Enter". Verás barritas de colores descargando cosas. Es normal, está construyendo el servidor.
+
+---------------------------------------------------
+PASO 6: ¡DISFRUTA TU PÁGINA!
+---------------------------------------------------
+Abre internet (Chrome, Edge, etc) y entra a estas direcciones:
+
+- Para ver la Inmobiliaria:  http://localhost:8080
+- Para ver la base de datos: http://localhost:8081
+
+*Nota: Para apagar el servidor al final del día, puedes ir a Docker Desktop y presionar el botón de "Stop" (cuadradito) en tu proyecto, o en la terminal escribir `docker-compose stop`. Tus datos están a salvo.*

@@ -1,0 +1,8 @@
+Versiones del Entorno de Contenedores (Docker) para el proyecto Inmobiliaria:
+
+He analizado tu entorno local de XAMPP para asegurarme de que las versiones en Docker sean totalmente compatibles con tu entorno de desarrollo actual.
+
+- PHP: 8.2 (con Apache) -> Basado en tu versión local (PHP 8.2.12).
+- Base de Datos: MariaDB 10.4 -> Basado en tu versión local (10.4.32-MariaDB).
+- Servidor Web: Apache 2.4 -> Módulo incluido por defecto en la imagen oficial `php:8.2-apache`.
+- Gestor BD Alternativo: phpMyAdmin (latest) -> Incluido como servicio complementario para administrar gráficamente la bd.

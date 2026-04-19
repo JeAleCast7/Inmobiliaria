@@ -1,0 +1,13 @@
+.git
+.gitignore
+.gitattributes
+README.md
+vendor/
+node_modules/
+.env
+Dockerfile
+docker-compose.yml
+.dockerignore
+zDocumentacion/
+versiones.txt
+INSTRUCCIONES_DOCKER.md

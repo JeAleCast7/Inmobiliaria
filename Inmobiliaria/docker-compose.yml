@@ -1,0 +1,60 @@
+services:
+  # Servicio de la aplicación web (PHP + Apache)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inmobiliaria_web
+    ports:
+      - "8080:80"  # Exponemos el puerto 80 del contenedor al puerto 8080 de tu máquina
+    volumes:
+      - .:/var/www/html # Sincroniza en tiempo real tu código local con el del contenedor
+    environment:
+      - TZ=America/Mexico_City
+    depends_on:
+      - db # Nos aseguramos de que inicie la base de datos antes que la web
+    networks:
+      - app-network
+
+  # Servicio de Base de Datos (MariaDB)
+  db:
+    image: mariadb:10.4
+    container_name: inmobiliaria_db
+    restart: always # Siempre reiniciará el contenedor si este falla
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Permite usar la contraseña en blanco (como tu entorno actual)
+      MYSQL_DATABASE: inmobiliaria_db    # Nombre de tu base de datos
+    ports:
+      - "3306:3306" # Mapea puerto de MariaDB. Asegúrate de tener XAMPP MySQL apagado para evitar conflictos.
+    volumes:
+      - db_data:/var/lib/mysql # Asegura que si se borra el contenedor, la BD NO se pierda (persistencia)
+      # Importación automática de SQL: Mapeamos la carpeta local "db_init" 
+      # Si pones ahí tu archivo .sql, al crear el contenedor la importará automáticamente.
+      - ./db_init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  # Servicio de Administración de Base de Datos (phpMyAdmin)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: inmobiliaria_phpmyadmin
+    ports:
+      - "8081:80" # Podrás ver la interfaz en http://localhost:8081
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ""
+      ALLOW_EMPTY_PASSWORD: "yes"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+# Definición de la red interna para que los contenedores se comuniquen
+networks:
+  app-network:
+    driver: bridge
+
+# Definición del volumen persistente para la base de datos
+volumes:
+  db_data:
