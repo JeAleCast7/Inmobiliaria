@@ -88,95 +88,8 @@
             <p class="section__desc">Explora nuestra selección de propiedades premium en las mejores ubicaciones</p>
         </div>
 
-        <div class="properties-grid">
-            <?php
-$iconos_tipo = [
-    'casa' => '',
-    'apartamento' => '',
-    'oficina' => '',
-    'local' => '',
-    'lote' => '',
-    'bodega' => ''
-];
-
-if ($propiedades && mysqli_num_rows($propiedades) > 0):
-    while ($prop = mysqli_fetch_assoc($propiedades)):
-        $icono = $iconos_tipo[$prop['tipo']] ?? '🏠';
-        $tipo_badge = $prop['tipo_operacion'] ?? 'venta';
-        $precio = $prop['precio_publicado'] ?? $prop['precio'];
-?>
-            <?php
-                // Preparamos datos para la modal
-                $fotos_json = !empty($prop['fotos']) ? htmlspecialchars($prop['fotos'], ENT_QUOTES, 'UTF-8') : '[]';
-                $agente_telefono = !empty($prop['agente_telefono']) ? htmlspecialchars($prop['agente_telefono'], ENT_QUOTES, 'UTF-8') : '';
-            ?>
-            <article class="property-card fade-in" onclick="openPropertyModal(this)"
-                data-title="<?php echo htmlspecialchars(substr($prop['descripcion'], 0, 50) . '...', ENT_QUOTES, 'UTF-8'); ?>"
-                data-price="<?php echo number_format($precio, 0, ',', '.'); ?>"
-                data-desc="<?php echo htmlspecialchars($prop['descripcion'], ENT_QUOTES, 'UTF-8'); ?>"
-                data-beds="<?php echo htmlspecialchars($prop['habitaciones'], ENT_QUOTES, 'UTF-8'); ?>"
-                data-baths="<?php echo htmlspecialchars($prop['banos'], ENT_QUOTES, 'UTF-8'); ?>"
-                data-area="<?php echo htmlspecialchars($prop['area_m2'], ENT_QUOTES, 'UTF-8'); ?>"
-                data-phone="<?php echo $agente_telefono; ?>" data-images="<?php echo $fotos_json; ?>"
-                style="cursor: pointer;">
-                <div class="property-card__image">
-                    <?php echo $icono; ?>
-                    <span class="property-card__badge property-card__badge--<?php echo $tipo_badge; ?>">
-                        <?php echo ucfirst($tipo_badge); ?>
-                    </span>
-                </div>
-                <div class="property-card__body">
-                    <div class="property-card__type">
-                        <?php echo ucfirst($prop['tipo']); ?>
-                    </div>
-                    <h3 class="property-card__title">
-                        <?php echo htmlspecialchars($prop['descripcion']); ?>
-                    </h3>
-                    <div class="property-card__location">
-                        📍
-                        <?php echo htmlspecialchars($prop['direccion']); ?>
-                    </div>
-                    <div class="property-card__features">
-                        <?php if ($prop['habitaciones'] > 0): ?>
-                        <span class="property-card__feature">🛏️
-                            <?php echo $prop['habitaciones']; ?> Hab.
-                        </span>
-                        <?php
-        endif; ?>
-                        <?php if ($prop['banos'] > 0): ?>
-                        <span class="property-card__feature">🚿
-                            <?php echo $prop['banos']; ?> Baños
-                        </span>
-                        <?php
-        endif; ?>
-                        <span class="property-card__feature">📐
-                            <?php echo $prop['area_m2']; ?> m²
-                        </span>
-                        <?php if ($prop['estrato'] > 0): ?>
-                        <span class="property-card__feature">⭐ Estrato
-                            <?php echo $prop['estrato']; ?>
-                        </span>
-                        <?php
-        endif; ?>
-                    </div>
-                    <div class="property-card__price">
-                        $
-                        <?php echo number_format($precio, 0, ',', '.'); ?>
-                        <?php if ($tipo_badge === 'arriendo'): ?>
-                        <small>/mes</small>
-                        <?php
-        endif; ?>
-                    </div>
-                </div>
-            </article>
-            <?php
-    endwhile;
-else: ?>
-            <p style="text-align:center; color: var(--color-text-muted); grid-column: 1 / -1;">
-                No hay propiedades disponibles en este momento.
-            </p>
-            <?php
-endif; ?>
+        <div class="properties-grid" id="properties-grid-container">
+            <!-- El catálogo se cargará aquí dinámicamente mediante JS -->
         </div>
     </section>
 
@@ -409,6 +322,112 @@ endif; ?>
             currentImageIndex = (currentImageIndex + 1) % currentModalImages.length;
             updateModalImage();
         }
+
+        // --- LÓGICA DE CATÁLOGO DINÁMICO ---
+        function escapeHtml(unsafe) {
+            if (!unsafe) return "";
+            return unsafe
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        async function loadDynamicCatalog() {
+            const container = document.getElementById('properties-grid-container');
+            if (!container) return;
+
+            try {
+                const response = await fetch('api/obtener_propiedades.php');
+                const data = await response.json();
+
+                if (data.error || data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted); grid-column: 1 / -1;">No hay propiedades disponibles en este momento.</p>';
+                    return;
+                }
+
+                const iconos_tipo = {
+                    'casa': '',
+                    'apartamento': '🏢',
+                    'oficina': '💼',
+                    'local': '🏪',
+                    'lote': '🏞️',
+                    'bodega': '🏭'
+                };
+
+                let htmlContent = '';
+
+                data.forEach(prop => {
+                    const icono = iconos_tipo[prop.tipo] || '';
+                    const tipo_badge = prop.tipo_operacion || 'venta';
+                    const precio = prop.precio_publicado || prop.precio;
+
+                    // Formatear precio
+                    const formattedPrice = new Intl.NumberFormat('es-CO').format(precio);
+
+                    // Asegurar datos seguros para JSON
+                    const fotos_json = prop.fotos ? prop.fotos : '[]';
+
+                    // Título truncado
+                    const truncatedDesc = prop.descripcion.length > 50
+                        ? prop.descripcion.substring(0, 50) + '...'
+                        : prop.descripcion;
+
+                    htmlContent += `
+                        <article class="property-card fade-in visible" onclick="openPropertyModal(this)"
+                            data-title="${escapeHtml(truncatedDesc)}"
+                            data-price="${formattedPrice}"
+                            data-desc="${escapeHtml(prop.descripcion)}"
+                            data-beds="${escapeHtml(prop.habitaciones)}"
+                            data-baths="${escapeHtml(prop.banos)}"
+                            data-area="${escapeHtml(prop.area_m2)}"
+                            data-phone="${escapeHtml(prop.agente_telefono || '')}"
+                            data-images="${escapeHtml(fotos_json)}"
+                            style="cursor: pointer;">
+                            <div class="property-card__image">
+                                ${icono}
+                                <span class="property-card__badge property-card__badge--${escapeHtml(tipo_badge)}">
+                                    ${escapeHtml(tipo_badge.charAt(0).toUpperCase() + tipo_badge.slice(1))}
+                                </span>
+                            </div>
+                            <div class="property-card__body">
+                                <div class="property-card__type">
+                                    ${escapeHtml(prop.tipo.charAt(0).toUpperCase() + prop.tipo.slice(1))}
+                                </div>
+                                <h3 class="property-card__title">
+                                    ${escapeHtml(prop.descripcion)}
+                                </h3>
+                                <div class="property-card__location">
+                                    📍 ${escapeHtml(prop.direccion)}
+                                </div>
+                                <div class="property-card__features">
+                                    ${prop.habitaciones > 0 ? `<span class="property-card__feature">🛏️ ${prop.habitaciones} Hab.</span>` : ''}
+                                    ${prop.banos > 0 ? `<span class="property-card__feature">🚿 ${prop.banos} Baños</span>` : ''}
+                                    <span class="property-card__feature">📐 ${prop.area_m2} m²</span>
+                                    ${prop.estrato > 0 ? `<span class="property-card__feature">⭐ Estrato ${prop.estrato}</span>` : ''}
+                                </div>
+                                <div class="property-card__price">
+                                    $ ${formattedPrice}
+                                    ${tipo_badge === 'arriendo' ? '<small>/mes</small>' : ''}
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                });
+
+                container.innerHTML = htmlContent;
+
+            } catch (error) {
+                console.error("Error cargando el catálogo:", error);
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted); grid-column: 1 / -1;">Error al cargar las propiedades.</p>';
+            }
+        }
+
+        // Cargar el catálogo tan pronto como el DOM esté listo
+        document.addEventListener('DOMContentLoaded', loadDynamicCatalog);
+
     </script>
 
     <!-- ═══════ PROPERTY MODAL ═══════ -->
