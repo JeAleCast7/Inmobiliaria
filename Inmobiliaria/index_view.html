@@ -276,13 +276,18 @@
             const phone = card.getAttribute('data-phone');
             const title = card.getAttribute('data-title');
             const waButton = document.getElementById('modalWhatsapp');
-            if (phone) {
-                const formattedPhone = phone.startsWith('3') ? '57' + phone : phone;
-                const message = encodeURIComponent(`Hola, quisiera más información sobre este inmueble: ${title}`);
-                waButton.href = `https://wa.me/${formattedPhone}?text=${message}`;
-                waButton.style.display = 'inline-flex';
-            } else {
-                waButton.style.display = 'none';
+            // PROTECCIÓN ADBLOCKER (Brave Shields)
+            // Si el bloqueador destruyó el botón de WhatsApp (waButton = null), el condicional
+            // impide que el sistema se quiebre, permitiendo que la ventana de la propiedad siga operando.
+            if (waButton) {
+                if (phone) {
+                    const formattedPhone = phone.startsWith('3') ? '57' + phone : phone;
+                    const message = encodeURIComponent(`Hola, quisiera más información sobre este inmueble: ${title}`);
+                    waButton.href = `https://wa.me/${formattedPhone}?text=${message}`;
+                    waButton.style.display = 'inline-flex';
+                } else {
+                    waButton.style.display = 'none';
+                }
             }
 
             try {
@@ -369,8 +374,8 @@
 
                     // Asegurar datos seguros para JSON
                     const fotos_json = prop.fotos ? prop.fotos : '[]';
-                    
-                    // Extraer la primera foto si existe
+
+                    // Extraer la primera foto si existe FOTOS REALES
                     let primera_foto = '';
                     try {
                         const fotos_array = JSON.parse(prop.fotos || '[]');

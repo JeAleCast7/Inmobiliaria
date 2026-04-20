@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Panel — Boyaca Real Estate</title>
-    <link rel="stylesheet" href="../css/panel.css">
+    <!-- FORZANDO LA RECARGA DE CACHÉ (Cache Busting) -->
+    <!-- Se adjunta '?v=time()' para garantizar que navegadores como Brave no guarden 
+         el archivo CSS antiguo en memoria, asegurando que el diseño del Modal sí se aplique. -->
+    <link rel="stylesheet" href="../css/panel.css?v=<?php echo time(); ?>">
 </head>
 <body>
 
@@ -26,10 +29,10 @@
 
     <div class="sidebar__label">Menú</div>
     <ul class="sidebar__menu">
-        <li><a class="active" onclick="mostrar('dashboard')"><span class="icon">🏠</span> Inicio</a></li>
-        <li><a onclick="mostrar('propiedades')"><span class="icon">🏢</span> Propiedades</a></li>
-        <li><a onclick="mostrar('reservas')"><span class="icon">📋</span> Mis Reservas</a></li>
-        <li><a onclick="mostrar('billetera')"><span class="icon">💳</span> Mi Billetera</a></li>
+        <li><a class="active" onclick="mostrar('dashboard', this)"><span class="icon">🏠</span> Inicio</a></li>
+        <li><a onclick="mostrar('propiedades', this)"><span class="icon">🏢</span> Propiedades</a></li>
+        <li><a onclick="mostrar('reservas', this)"><span class="icon">📋</span> Mis Reservas</a></li>
+        <li><a onclick="mostrar('billetera', this)"><span class="icon">💳</span> Mi Billetera</a></li>
     </ul>
 
     <div class="sidebar__logout">
@@ -97,10 +100,26 @@
                 <?php while ($p = mysqli_fetch_assoc($propiedades)):
                     $icono = $iconos_tipo[$p['tipo']] ?? '🏠';
                     $tipo_op = $p['tipo_operacion'] ?? 'venta';
+                    
+                    $fotos_json = isset($p['fotos']) && $p['fotos'] ? $p['fotos'] : '[]';
+                    $fotos_array = json_decode($fotos_json, true) ?: [];
+                    $primera_foto = !empty($fotos_array) ? $fotos_array[0] : '';
+                    
+                    $truncated_desc = mb_strimwidth($p['descripcion'], 0, 50, '...');
+                    $formatted_price = number_format($p['precio_pub'] ?? $p['precio'] ?? 0, 0, ',', '.');
                 ?>
-                <article class="catalog-card">
-                    <div class="catalog-card__image">
-                        <?php echo $icono; ?>
+                <article class="catalog-card" style="cursor: pointer;" onclick="openPropertyModal(this)"
+                    data-title="<?php echo htmlspecialchars($truncated_desc); ?>"
+                    data-price="<?php echo $formatted_price; ?>"
+                    data-desc="<?php echo htmlspecialchars($p['descripcion']); ?>"
+                    data-beds="<?php echo htmlspecialchars($p['habitaciones']); ?>"
+                    data-baths="<?php echo htmlspecialchars($p['banos']); ?>"
+                    data-area="<?php echo htmlspecialchars($p['area_m2']); ?>"
+                    data-phone="<?php echo htmlspecialchars($p['agente_tel'] ?? ''); ?>"
+                    data-images="<?php echo htmlspecialchars($fotos_json); ?>">
+                    
+                    <div class="catalog-card__image" <?php echo $primera_foto ? 'style="background-image: url(\'../'.htmlspecialchars($primera_foto).'\'); background-size: cover; background-position: center;"' : ''; ?>>
+                        <?php echo $primera_foto ? '' : $icono; ?>
                         <span class="catalog-card__badge catalog-card__badge--<?php echo $tipo_op; ?>">
                             <?php echo ucfirst($tipo_op); ?>
                         </span>
@@ -212,13 +231,158 @@
 </main>
 
 <script>
-function mostrar(seccion) {
+// GESTIÓN DE PESTAÑAS (COMPATIBILIDAD DE EVENTOS)
+// Recibimos 'elemento' de forma explícita mediante 'this' en el HTML.
+// No usamos variables globales como 'event.currentTarget' porque navegadores rígidos (Brave/Firefox) las bloquean.
+function mostrar(seccion, elemento) {
     ['dashboard', 'propiedades', 'reservas', 'billetera'].forEach(s => document.getElementById(s).style.display = 'none');
     document.getElementById(seccion).style.display = 'block';
+    
     document.querySelectorAll('.sidebar__menu a').forEach(a => a.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if (elemento) {
+        elemento.classList.add('active');
+    }
+}
+
+let currentModalImages = [];
+let currentImageIndex = 0;
+
+function openPropertyModal(card) {
+    const modal = document.getElementById('propertyModal');
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('modalDesc').textContent = card.getAttribute('data-desc');
+    document.getElementById('modalBeds').textContent = card.getAttribute('data-beds') || '0';
+    document.getElementById('modalBaths').textContent = card.getAttribute('data-baths') || '0';
+    document.getElementById('modalArea').textContent = card.getAttribute('data-area') || '0';
+    document.getElementById('modalPrice').textContent = '$' + card.getAttribute('data-price');
+
+    const phone = card.getAttribute('data-phone');
+    const title = card.getAttribute('data-title');
+    const waButton = document.getElementById('modalWhatsapp');
+    // CONDICIONAL ANTIRASTREO (Brave Shields / AdBlockers)
+    // Los bloqueadores eliminan frecuentemente el código que tenga palabras como 'whatsapp'.
+    // Si 'waButton' fue destruido, el valor es null. El 'if(waButton)' nos defiende de ese escenario
+    // saltando este fragmento en lugar de arrojar un error y trancar el resto del sistema del Modal.
+    if (waButton) {
+        if (phone) {
+            const formattedPhone = phone.startsWith('3') ? '57' + phone : phone;
+            const message = encodeURIComponent(`Hola, quisiera más información sobre este inmueble: ${title}`);
+            waButton.href = `https://wa.me/${formattedPhone}?text=${message}`;
+            waButton.style.display = 'inline-flex';
+        } else {
+            waButton.style.display = 'none';
+        }
+    }
+
+    try {
+        currentModalImages = JSON.parse(card.getAttribute('data-images') || '[]');
+    } catch (e) {
+        currentModalImages = [];
+    }
+    if (!Array.isArray(currentModalImages) || currentModalImages.length === 0) {
+        currentModalImages = ['../img/logo.png'];
+    } else {
+        currentModalImages = currentModalImages.map(img => '../' + img);
+    }
+    currentImageIndex = 0;
+    updateModalImage();
+
+    modal.classList.add('active');
+}
+
+function closePropertyModal() {
+    document.getElementById('propertyModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function updateModalImage() {
+    const imgEl = document.getElementById('modalImage');
+    if (currentModalImages[currentImageIndex]) {
+        imgEl.src = currentModalImages[currentImageIndex];
+    }
+}
+
+function prevModalImage() {
+    if (currentModalImages.length <= 1) return;
+    currentImageIndex = (currentImageIndex - 1 + currentModalImages.length) % currentModalImages.length;
+    updateModalImage();
+}
+
+function nextModalImage() {
+    if (currentModalImages.length <= 1) return;
+    currentImageIndex = (currentImageIndex + 1) % currentModalImages.length;
+    updateModalImage();
 }
 </script>
+
+    <!-- ═══════ PROPERTY MODAL ═══════ -->
+    <div id="propertyModal" class="property-modal">
+        <div class="property-modal__content">
+            <button class="property-modal__close" onclick="closePropertyModal()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="property-modal__brand">
+                <img src="../img/logo.png" alt="BRE Logo">
+                Boyaca Real Estate
+            </div>
+
+            <div class="property-modal__grid">
+                <!-- Left: Carousel -->
+                <div class="property-modal__carousel">
+                    <button class="carousel__btn carousel__btn--prev" onclick="prevModalImage()">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="carousel__image-container">
+                        <img id="modalImage" src="../img/logo.png" alt="Property Image">
+                    </div>
+                    <button class="carousel__btn carousel__btn--next" onclick="nextModalImage()">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Right: Details -->
+                <div class="property-modal__details">
+                    <h3 class="property-modal__title">"Información sobre inmueble"</h3>
+                    <p id="modalDesc" class="property-modal__desc"></p>
+
+                    <div class="property-modal__features">
+                        <div class="modal-feature"><span id="modalBeds"></span> Hab</div>
+                        <div class="modal-feature"><span id="modalBaths"></span> Baños</div>
+                        <div class="modal-feature"><span id="modalArea"></span> m2</div>
+                    </div>
+
+                    <div class="property-modal__cta">
+                        <div class="property-modal__cta-text">
+                            ¿Quieres más información<br>o agendar una cita?
+                            <svg style="margin-left:10px" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                        <a id="modalWhatsapp" href="#" target="_blank" class="btn btn--outline btn--whatsapp">
+                            Habla con uno de<br>nuestros agentes!
+                        </a>
+                    </div>
+
+                    <div class="property-modal__price-wrapper">
+                        <div id="modalPrice" class="property-modal__price"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

@@ -14,7 +14,9 @@ $billetera = mysqli_fetch_assoc(mysqli_query($conex, "SELECT * FROM billetera WH
 $mis_reservas = mysqli_fetch_assoc(mysqli_query($conex, "SELECT COUNT(*) as total FROM reservas WHERE id_cliente = $id_cliente"))['total'];
 
 // Propiedades disponibles
-$propiedades = mysqli_query($conex, "SELECT i.*, inv.tipo as tipo_operacion, inv.precio as precio_pub, a.nombre as agente_nombre, a.telefono as agente_tel
+// ANEXO DE IMÁGENES: Se añadió explícitamente 'inv.fotos' a la sentencia SELECT (antes no estaba).
+// Esto permite que el sistema del Modal (Frontend) lea el JSON de las fotos extraído de la base de datos y cargue el carrusel de la propiedad correctamente.
+$propiedades = mysqli_query($conex, "SELECT i.*, inv.tipo as tipo_operacion, inv.precio as precio_pub, inv.fotos, a.nombre as agente_nombre, a.telefono as agente_tel
     FROM inmuebles i
     JOIN inventario inv ON i.id_inmueble = inv.id_inmueble
     LEFT JOIN agentes a ON i.id_agente = a.id_agente
