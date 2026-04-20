@@ -261,7 +261,7 @@ INSERT INTO inventario (id_inmueble, id_inmobiliaria, estado, tipo, precio, desc
 (5, 1, 'activo', 'venta', 380000000, 'Local comercial estratégico'),
 (6, 1, 'activo', 'venta', 650000000, 'Casa campestre de lujo');
 
-
+--PARA AGREGAR LAS FOTOS A LOS INMUEBLES
 UPDATE inventario
 SET fotos = '["uploads\/casa1.png","uploads\/casa2.png","uploads\/casa3.png","uploads\/casa4.png","uploads\/casa5.png"]'
-WHERE id = 1;
+WHERE id_inventario = 1;
