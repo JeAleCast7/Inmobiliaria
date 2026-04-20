@@ -1,1 +1,4 @@
-Need of PHP 8.0 (at the moment) for run it local
+- PHP: 8.2 (con Apache) -> (PHP 8.2.12).
+- Base de Datos: MariaDB 10.4 -> (10.4.32-MariaDB).
+- Servidor Web: Apache 2.4 -> Módulo incluido por defecto en la imagen oficial `php:8.2-apache`.
+- Gestor BD Alternativo: phpMyAdmin (latest) -> Incluido como servicio complementario para administrar gráficamente la bd.
