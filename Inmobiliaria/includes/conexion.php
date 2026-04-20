@@ -1,7 +1,9 @@
 <?php
 mysqli_report(MYSQLI_REPORT_OFF);
 
-$servidor = "localhost";
+//Antes estaba $servidor = "localhost";
+//  Si Docker pasa DB_HOST, usamos ese valor (ej: 'db'), sino usamos el valor por defecto ('localhost' para XAMPP).
+$servidor = getenv('DB_HOST') ?: "localhost";
 $usuario = "root";
 $clave = "";
 $base_datos = "inmobiliaria_db";

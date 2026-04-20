@@ -1,0 +1,19 @@
+# =============================================================================
+# Dockerfile.db — Imagen personalizada de Base de Datos
+# =============================================================================
+# Usamos MariaDB 10.4 como base (la misma versión que XAMPP).
+# La "magia" aquí: copiamos el init.sql DENTRO de la imagen, en la carpeta
+# especial que MariaDB ejecuta automáticamente al iniciarse por primera vez.
+# Así quien haga 'docker pull' de esta imagen ya tiene los datos incluidos.
+# =============================================================================
+
+FROM mariadb:10.4
+
+# Copiamos nuestro dump SQL directamente dentro de la imagen.
+# MariaDB ejecuta todo lo que encuentre en /docker-entrypoint-initdb.d/ 
+# la primera vez que el contenedor arranca con un volumen vacío.
+COPY db_init/init.sql /docker-entrypoint-initdb.d/init.sql
+
+# Variables de entorno por defecto (pueden sobreescribirse en docker-compose.yml)
+ENV MYSQL_ALLOW_EMPTY_PASSWORD=yes
+ENV MYSQL_DATABASE=inmobiliaria_db

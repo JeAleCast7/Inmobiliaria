@@ -1,9 +1,7 @@
 services:
   # Servicio de la aplicación web (PHP + Apache)
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: jealecast7/inmobiliaria:v1.1 # Imagen publicada en Docker Hub
     container_name: inmobiliaria_web
     ports:
       - "8080:80"  # Exponemos el puerto 80 del contenedor al puerto 8080 de tu máquina
@@ -11,14 +9,16 @@ services:
       - .:/var/www/html # Sincroniza en tiempo real tu código local con el del contenedor
     environment:
       - TZ=America/Mexico_City
+      - DB_HOST=db
     depends_on:
       - db # Nos aseguramos de que inicie la base de datos antes que la web
     networks:
       - app-network
 
-  # Servicio de Base de Datos (MariaDB)
+  # Servicio de Base de Datos (MariaDB personalizada con datos pre-cargados)
+  # Imagen personalizada con el init.sql cocinado adentro — datos incluidos al levantar.
   db:
-    image: mariadb:10.4
+    image: jealecast7/inmobiliaria-db:v1.1 # Imagen publicada en Docker Hub
     container_name: inmobiliaria_db
     restart: always # Siempre reiniciará el contenedor si este falla
     environment:
@@ -28,9 +28,6 @@ services:
       - "3306:3306" # Mapea puerto de MariaDB. Asegúrate de tener XAMPP MySQL apagado para evitar conflictos.
     volumes:
       - db_data:/var/lib/mysql # Asegura que si se borra el contenedor, la BD NO se pierda (persistencia)
-      # Importación automática de SQL: Mapeamos la carpeta local "db_init" 
-      # Si pones ahí tu archivo .sql, al crear el contenedor la importará automáticamente.
-      - ./db_init:/docker-entrypoint-initdb.d
     networks:
       - app-network
 

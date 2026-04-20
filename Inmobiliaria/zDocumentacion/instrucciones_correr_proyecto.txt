@@ -74,3 +74,20 @@ Abre internet (Chrome, Edge, etc) y entra a estas direcciones:
 - Para ver la base de datos: http://localhost:8081
 
 *Nota: Para apagar el servidor al final del día, puedes ir a Docker Desktop y presionar el botón de "Stop" (cuadradito) en tu proyecto, o en la terminal escribir `docker-compose stop`. Tus datos están a salvo.*
+
+
+===================================================
+NUEVA AUTOMATIZACIÓN DOCKER (PLUG & PLAY)
+===================================================
+
+Recientemente el proyecto fue modificado para ser 100% automático. Si vas a trabajar con la nueva imagen y la estructura automatizada presente en el proyecto, verás que los Pasos 2, 3 y 4 de arriba ya no son estrictamente obligatorios gracias a estos dos avances:
+
+A) VARIABLES DE ENTORNO (Adiós a modificar conexion.php)
+Ya no necesitas alterar tu código fuente cada vez que saltas a Docker. 
+En `conexion.php`, el `$servidor = "localhost"` fue reemplazado para detectar Variables de Entorno nativas de Docker. En paralelo, en el archivo `docker-compose.yml` hemos inyectado por defecto la variable `DB_HOST=db`. 
+¿Qué logra esto? Si ejecutas el código de PHP y Apache fuera de Docker (como en el clásico panel de XAMPP), la máquina usará tu "localhost" normalmente como siempre. Sin embargo, al momento de correr en Docker, el sistema detectará el `DB_HOST` y enrutará la conexión de servidor con el servicio MariaDB (cuyo nombre oficial es "db") uniendo ambas máquinas de forma impecable sin tocar código fuente.
+
+B) AUTO-INICIALIZACIÓN DE LA BASE DE DATOS (Carpeta db_init/)
+En lugar de acceder a phpMyAdmin para importar un .sql pesado cada vez que se despliegan tus servicios, contamos con una carpeta vital llamada "db_init/".
+Cualquier archivo de código SQL que alojes allí (sea exportado por ti o provisto por un tercero) se carga en Docker automáticamente tras crearse la infraestructura. El servicio MariaDB toma este archivo en el encendido primordial y edifica tus tablas, registros o fotografías vaciándolas enteras en el contenedor central. 
+*Nota para desarrolladores: Ya hemos extraído y añadido ahí tu backup principal, evitando que nazca en ceros al ejecutar comando "compose up".*
