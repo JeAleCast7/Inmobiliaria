@@ -250,7 +250,7 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: url('../img/bogota.png') center center / cover no-repeat;
+    background: url('../img/boyaca.png') center center / cover no-repeat;
     position: relative;
     overflow: hidden;
     padding: 120px 60px 80px;
@@ -1086,10 +1086,12 @@ img {
     .property-modal__grid {
         grid-template-columns: 1fr;
     }
+
     .property-modal__cta {
         flex-direction: column;
         align-items: flex-start;
     }
+
     .property-modal__cta-text {
         text-align: left;
     }

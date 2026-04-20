@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boyaca Real Estate — Tu Hogar Ideal</title>
+    <title>Boyacá Real Estate — Tu Hogar Ideal</title>
     <meta name="description"
         content="Encuentra tu hogar ideal con Boyaca Real Estate. Casas, apartamentos, oficinas y locales comerciales en las mejores ubicaciones de Bogotá.">
     <link rel="stylesheet" href="css/estilos.css?v=<?php echo time(); ?>">
@@ -19,7 +19,7 @@
                 <!-- Logo PNG: reemplazar src con la ruta de tu logo -->
                 <img src="img/logo.png" alt="BRE Logo">
             </div>
-            <div class="navbar__logo-text">Boyaca <span>Real Estate</span></div>
+            <div class="navbar__logo-text">Boyacá <span>Real Estate</span></div>
         </a>
 
         <ul class="navbar__menu" id="navMenu">
@@ -61,15 +61,15 @@
             </div>
             <div class="hero__stats">
                 <div class="hero__stat">
-                    <div class="hero__stat-number">150+</div>
+                    <div class="hero__stat-number">80+</div>
                     <div class="hero__stat-label">Propiedades</div>
                 </div>
                 <div class="hero__stat">
-                    <div class="hero__stat-number">500+</div>
-                    <div class="hero__stat-label">Clientes Felices</div>
+                    <div class="hero__stat-number">50+</div>
+                    <div class="hero__stat-label">Clientes</div>
                 </div>
                 <div class="hero__stat">
-                    <div class="hero__stat-number">10+</div>
+                    <div class="hero__stat-number">5+</div>
                     <div class="hero__stat-label">Años de Experiencia</div>
                 </div>
                 <div class="hero__stat">
@@ -193,9 +193,9 @@
                     <div class="navbar__logo-icon">
                         <img src="img/logo.png" alt="BRE Logo">
                     </div>
-                    <div class="navbar__logo-text">Boyaca <span>Real Estate</span></div>
+                    <div class="navbar__logo-text">Boyacá <span>Real Estate</span></div>
                 </a>
-                <p>Tu aliado de confianza en bienes raíces. Más de 10 años ayudando a familias a encontrar su hogar
+                <p>Tu aliado de confianza en bienes raíces. Más de 5 años ayudando a familias a encontrar su hogar
                     ideal.</p>
             </div>
             <div class="footer__col">
@@ -369,6 +369,17 @@
 
                     // Asegurar datos seguros para JSON
                     const fotos_json = prop.fotos ? prop.fotos : '[]';
+                    
+                    // Extraer la primera foto si existe
+                    let primera_foto = '';
+                    try {
+                        const fotos_array = JSON.parse(prop.fotos || '[]');
+                        if (fotos_array.length > 0) {
+                            primera_foto = fotos_array[0];
+                        }
+                    } catch (e) {
+                        console.error('Error parseando fotos', e);
+                    }
 
                     // Título truncado
                     const truncatedDesc = prop.descripcion.length > 50
@@ -386,8 +397,8 @@
                             data-phone="${escapeHtml(prop.agente_telefono || '')}"
                             data-images="${escapeHtml(fotos_json)}"
                             style="cursor: pointer;">
-                            <div class="property-card__image">
-                                ${icono}
+                            <div class="property-card__image" ${primera_foto ? `style="background-image: url('${escapeHtml(primera_foto)}'); background-size: cover; background-position: center;"` : ''}>
+                                ${primera_foto ? '' : icono}
                                 <span class="property-card__badge property-card__badge--${escapeHtml(tipo_badge)}">
                                     ${escapeHtml(tipo_badge.charAt(0).toUpperCase() + tipo_badge.slice(1))}
                                 </span>
