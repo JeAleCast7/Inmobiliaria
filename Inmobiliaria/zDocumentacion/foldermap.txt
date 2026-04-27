@@ -1,0 +1,18 @@
+Inmobiliaria/
+├── app/                    # Lógica interna (Cerebro - Protegida)
+│   ├── Config/             # Rutas, DB, Constantes
+│   ├── Controllers/        # Orquestadores de peticiones
+│   ├── Core/               # Motor del Framework (Router, PDO Wrapper)
+│   ├── Middleware/         # Guardias de Seguridad (Auth, Roles)
+│   ├── Models/             # Capa de datos y entidades
+│   ├── Services/           # Lógica de negocio (Capa pura)
+│   └── Views/              # Templates HTML/PHP
+├── public/                 # ÚNICA carpeta accesible via Web (Front Controller)
+│   ├── assets/             # CSS, JS, Images (Frontend)
+│   ├── uploads/            # Archivos dinámicos (Protegidos por .htaccess)
+│   ├── .htaccess           # Redirección al index.php
+│   └── index.php           # Punto de entrada único
+├── database/               # Scripts SQL y migraciones
+├── .env                    # Variables de entorno sensibles (¡No subir a Git!)
+├── composer.json           # Gestión de Autoloading (PSR-4)
+└── Dockerfile              # Configuración de contenedor optimizada
