@@ -1,6 +1,5 @@
-# Usamos la imagen oficial de PHP versión 8.2 con el servidor Apache integrado, 
-# la cual concuerda con tu versión local en XAMPP.
-FROM php:8.2-apache
+# Usamos la imagen oficial de PHP versión 7.4 con el servidor Apache integrado.
+FROM php:7.4-apache
 
 # Habilitamos mod_rewrite de Apache, necesario si utilizas o utilizarás 
 # URLs amigables (ej. con archivos .htaccess).

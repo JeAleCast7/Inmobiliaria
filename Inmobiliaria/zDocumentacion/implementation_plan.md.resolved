@@ -1,0 +1,118 @@
+# Reestructuración Arquitectónica: Inmobiliaria Pro
+
+Este documento detalla la transformación del proyecto **Inmobiliaria** desde una estructura monolítica basada en pantallas hacia una arquitectura profesional **MVC (Modelo-Vista-Controlador)** desacoplada, segura y escalable.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Cambio de Paradigma**: Pasaremos de archivos `.php` físicos accesibles por URL (ej: `Login/index.php`) a un **Front Controller** único (`public/index.php`) con un sistema de rutas.
+> **Seguridad**: Se eliminarán las contraseñas en texto plano. Se implementará `password_hash()` y `password_verify()`.
+> **Base de Datos**: Migraremos de `mysqli` a **PDO** para una gestión de errores más limpia y portabilidad.
+
+## 1. Problemas de la Estructura Actual
+
+*   **Lógica Fragmentada**: Cada funcionalidad (Admin, Agente, Cliente) es una "isla" con su propio `index.php`, lo que duplica código (headers, footers, conexiones).
+*   **Inseguridad Crítica**: Contraseñas en texto plano detectadas en `validar_login.php`.
+*   **Acoplamiento Fuerte**: La lógica de negocio está mezclada con el HTML y la gestión de base de datos.
+*   **Exposición de Archivos**: Carpeta raíz expuesta al servidor web. Cualquier archivo (scripts, logs, config) podría ser accesible si no se configura bien el servidor.
+*   **Mantenibilidad Nula**: Si cambias el diseño del header, debes editarlo en 4 o 5 lugares diferentes.
+
+---
+
+## 2. Nueva Estructura Propuesta
+
+```text
+Inmobiliaria/
+├── app/                    # Lógica interna (Protegida)
+│   ├── Config/             # Constantes, DB params
+│   ├── Controllers/        # Manejadores de Requests
+│   ├── Core/               # Motor del Framework (Router, App, Base Classes)
+│   ├── Middleware/         # Auth, Role guards, CORS
+│   ├── Models/             # Interacción con DB (Entities/Repositories)
+│   ├── Services/           # Lógica de negocio compleja (AuthService, ImageService)
+│   └── Views/              # Templates (puros o con motor de plantillas)
+│       ├── admin/
+│       ├── auth/
+│       ├── layout/         # Header/Footer compartidos
+│       └── portal/
+├── bin/                    # Scripts de consola (migraciones, tareas programadas)
+├── database/               # SQL scripts y esquemas
+├── docs/                   # Documentación técnica, diagramas, API docs
+├── public/                 # ÚNICA carpeta accesible via Web
+│   ├── assets/             # CSS, JS, Img (Frontend)
+│   ├── uploads/            # Archivos subidos (Propiedades)
+│   ├── .htaccess           # Redirección al Front Controller
+│   └── index.php           # Front Controller
+├── tests/                  # Unit & Integration tests
+├── .env                    # Variables de entorno (Sensible)
+├── .gitignore
+├── composer.json           # Autoloading (PSR-4)
+├── docker-compose.yml
+└── Dockerfile
+```
+
+---
+
+## 3. Explicación de Carpetas
+
+### `public/`
+*   **Qué hace**: Es la cara pública del servidor. Solo archivos que el navegador NECESITA descargar directamente.
+*   **Por qué**: Seguridad. Evita que un usuario acceda a `app/Config/db.key` por accidente.
+*   **Buenas Prácticas**: El servidor web (Apache/Nginx) debe apuntar su `DocumentRoot` a esta carpeta, NO a la raíz del proyecto.
+
+### `app/Core/`
+*   **Qué hace**: Contiene el nucleo: `Router.php` (toma la URL y decide qué controller llamar) y `Database.php` (Singleton o Factory para PDO).
+*   **Error común**: Meter lógica de negocio aquí. El Core no debe saber qué es una "Propiedad".
+
+### `app/Controllers/`
+*   **Qué hace**: Recibe los datos del Router, pide datos al Model y decide qué Vista mostrar.
+*   **Buenas Prácticas**: Deben ser "Thin Controllers" (delgados). Solo coordinan. La lógica pesada va en **Services**.
+
+### `app/Services/`
+*   **Qué hace**: El puente entre Controller y Model. Por ejemplo, `PropertyService` se encarga de subir la imagen, redimensionarla y luego guardar el registro en el Model.
+
+---
+
+## 4. Migración de Lógica
+
+| Funcionalidad | Ubicación Actual | Nueva Ubicación MVC |
+| :--- | :--- | :--- |
+| Login Logic | `Login/validar_login.php` | `AuthController.php` -> `AuthService.php` |
+| Vistas Admin | `Admin/` | `app/Views/admin/` |
+| API Propiedades | `api/obtener_propiedades.php` | `PropertyController.php` (method: `apiGet`) |
+| Conexión DB | `includes/conexion.php` | `app/Core/Database.php` |
+| Sesiones | `includes/sesion.php` | `app/Middleware/AuthMiddleware.php` |
+
+---
+
+## 5. Diseño RESTful API
+
+La API no será una colección de scripts sueltos, sino rutas estructuradas:
+
+*   **POST** `/api/v1/auth/login` -> Autenticación.
+*   **GET** `/api/v1/properties` -> Listado de inmuebles.
+*   **POST** `/api/v1/properties` -> Crear (Solo Agente/Admin).
+*   **PUT** `/api/v1/properties/:id` -> Actualizar.
+*   **DELETE** `/api/v1/properties/:id` -> Borrar.
+
+**Seguridad API**:
+*   Middleware de validación de JWT o Session Token.
+*   Rate Limiting para evitar ataques de fuerza bruta.
+
+---
+
+## 6. Seguridad Crítica (Plan de Acción)
+
+1.  **Passwords**: Implementar `password_hash(..., PASSWORD_ARGON2ID)` (o BCRYPT).
+2.  **Prepared Statements**: Prohibido concatenar variables en SQL. Uso estricto de PDO.
+3.  **XSS**: Sanitización de salidas en las Vistas usando `htmlspecialchars()`.
+4.  **CSRF**: Tokens en todos los formularios POST para evitar envíos maliciosos externos.
+5.  **Headers de Seguridad**: CSP, X-Frame-Options, HSTS configurados en el servidor/PHP.
+
+---
+
+## 8. Verificación
+
+1.  **Test de Rutas**: Verificar que `domain.com/login` carga el controlador correcto.
+2.  **Test de Seguridad**: Intentar acceder a `app/Config/config.php` desde el navegador (debe dar 403 o no existir en el path público).
+3.  **Docker Health Check**: Validar que el contenedor levante con el nuevo `DocumentRoot`.

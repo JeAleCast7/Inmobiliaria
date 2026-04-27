@@ -1,0 +1,20 @@
+{
+    "name": "jealecast7/inmobiliaria",
+    "description": "Sistema de Gestión Inmobiliaria Profesional",
+    "type": "project",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Senior Software Architect",
+            "email": "architect@example.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    }
+}

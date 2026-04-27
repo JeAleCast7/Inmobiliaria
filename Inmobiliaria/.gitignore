@@ -1,0 +1,13 @@
+# Variables de Entorno y Configuración Local
+.env
+
+# Dependencias (si usas Composer o NPM a futuro)
+vendor/
+node_modules/
+
+# Archivos de SO
+.DS_Store
+Thumbs.db
+
+# Logs y Cache
+*.log

@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si entran a la raíz, enviarlos al portal MVC en /public
+    RewriteRule ^$ public/ [L]
+
+    # Si intentan acceder a una ruta que NO es un archivo real en la raíz,
+    # y la ruta empieza por api/, lo enviamos a public para el nuevo sistema.
+    # RewriteCond %{REQUEST_FILENAME} !-f
+    # RewriteCond %{REQUEST_FILENAME} !-d
+    # RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
