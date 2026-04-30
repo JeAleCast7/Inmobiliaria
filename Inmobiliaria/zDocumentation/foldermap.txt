@@ -7,12 +7,17 @@ Inmobiliaria/
 │   ├── Models/             # Capa de datos y entidades
 │   ├── Services/           # Lógica de negocio (Capa pura)
 │   └── Views/              # Templates HTML/PHP
+├── bin/                    # Ejecutables y scripts de línea de comandos (CLI)
+├── database/               # Scripts SQL y migraciones
+├── db_init/                # Scripts de inicialización automática para contenedores DB
+├── docs/                   # Documentación adicional del proyecto y manuales
 ├── public/                 # ÚNICA carpeta accesible via Web (Front Controller)
 │   ├── assets/             # CSS, JS, Images (Frontend)
 │   ├── uploads/            # Archivos dinámicos (Protegidos por .htaccess)
 │   ├── .htaccess           # Redirección al index.php
 │   └── index.php           # Punto de entrada único
-├── database/               # Scripts SQL y migraciones
+├── tests/                  # Pruebas unitarias y de integración
+├── zDocumentation/         # Documentación de arquitectura, planes y guías del sistema
 ├── .env                    # Variables de entorno sensibles (¡No subir a Git!)
 ├── composer.json           # Gestión de Autoloading (PSR-4)
 └── Dockerfile              # Configuración de contenedor optimizada

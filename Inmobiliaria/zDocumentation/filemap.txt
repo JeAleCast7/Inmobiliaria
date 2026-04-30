@@ -1,0 +1,67 @@
+MAPA DE ARCHIVOS DEL PROYECTO INMOBILIARIA
+==========================================
+
+/ (Raíz del proyecto)
+---------------------
+.dockerignore         : Define los archivos y directorios que Docker debe ignorar al construir las imágenes, optimizando el tamaño y la seguridad.
+.env                  : Archivo de variables de entorno (credenciales de DB, configuraciones). No debe subirse al repositorio.
+.env.example          : Plantilla base de las variables de entorno para orientar a nuevos desarrolladores.
+.gitignore            : Lista los archivos y carpetas locales que no deben ser rastreados ni versionados por Git (ej. /vendor, .env).
+.htaccess             : Configuración del servidor Apache a nivel de la raíz. Usualmente añade reglas de seguridad globales y previene el listado de directorios.
+composer.json         : Configuración de Composer (gestor de dependencias en PHP). Principalmente usado para el estándar de carga automática de clases (Autoloading PSR-4).
+docker-compose.yml    : Archivo de orquestación de Docker. Define los contenedores (aplicación web y base de datos MariaDB), sus volúmenes, puertos y variables.
+Dockerfile            : Archivo de configuración para construir paso a paso la imagen del contenedor de la aplicación web PHP/Apache.
+Dockerfile.db         : Archivo de configuración para construir la imagen del contenedor de la base de datos, con ajustes específicos si son requeridos.
+
+/app (Lógica Interna)
+---------------------
+app/.htaccess                         : Archivo de seguridad que bloquea el acceso web directo a la carpeta de la aplicación para proteger el código.
+app/Controllers/AdminController.php   : Controlador que maneja la lógica, vistas y acciones exclusivas del panel del administrador.
+app/Controllers/AgenteController.php  : Controlador encargado de las operaciones del dashboard del usuario con rol de agente.
+app/Controllers/AuthController.php    : Controlador que gestiona los procesos de autenticación: inicio de sesión, registro y cierre de sesión.
+app/Controllers/ClienteController.php : Controlador que procesa las interacciones del cliente autenticado desde su panel.
+app/Controllers/HomeController.php    : Controlador principal de la vista pública, se encarga de mostrar el catálogo o landing page inicial.
+app/Controllers/PropertyController.php: Controlador que maneja el CRUD (Crear, Leer, Actualizar, Borrar) y visualización de todas las propiedades.
+app/Core/Autoloader.php               : Script personalizado para cargar automáticamente las clases PHP (generalmente apoyado o reemplazado por Composer).
+app/Core/BaseController.php           : Clase base de la que heredan todos los controladores. Proporciona métodos comunes, como el mecanismo para renderizar vistas.
+app/Core/BaseModel.php                : Clase base para los modelos, diseñada para compartir métodos comunes o instancias de conexión a la base de datos.
+app/Core/Database.php                 : Clase que establece y gestiona la conexión a la base de datos usando PDO o MySQLi bajo un patrón (como Singleton).
+app/Core/Router.php                   : Enrutador de la aplicación. Captura la URL solicitada y determina qué controlador y método deben ejecutarse.
+app/Models/User.php                   : Modelo de datos para la entidad Usuario, gestionando las consultas relacionadas a autenticación, obtención de datos y roles.
+app/Views/admin/dashboard.php         : Plantilla (vista) del panel central de administración del sistema.
+app/Views/agente/dashboard.php        : Plantilla (vista) del panel del agente donde gestiona propiedades asignadas.
+app/Views/auth/login.php              : Plantilla HTML que muestra el formulario de acceso de usuarios.
+app/Views/auth/register.php           : Plantilla HTML del formulario de creación de nuevas cuentas.
+app/Views/cliente/dashboard.php       : Plantilla (vista) del panel de cliente, mostrando favoritos o detalles relevantes al usuario comprador.
+app/Views/portal/home.php             : Pantalla principal pública que muestra las propiedades al visitante general.
+
+/database (Base de Datos)
+-------------------------
+database/cleanup_duplicates.sql       : Script SQL para realizar limpieza y eliminar registros duplicados en tablas clave.
+database/inmobiliaria_db.sql          : Script principal con todo el esquema SQL (tablas, relaciones) y datos iniciales de la aplicación.
+database/restrict_photos.sql          : Script SQL destinado a gestionar restricciones, actualizaciones o correcciones de datos relacionados con fotos.
+
+/db_init (Inicialización Docker DB)
+-----------------------------------
+db_init/init.sql                      : Script ejecutado de manera automática por el contenedor de la base de datos al crearse por primera vez para inicializar su estructura.
+
+/public (Punto de Acceso Web)
+-----------------------------
+public/.htaccess                      : Archivo clave de Apache que redirige silenciosamente todas las solicitudes de URL hacia index.php (Front Controller).
+public/index.php                      : Punto de entrada único de toda la aplicación. Inicializa el entorno, incluye dependencias y despacha el enrutador.
+public/assets/css/auth.css            : Archivo de estilos CSS diseñado específicamente para la apariencia de las páginas de login y registro.
+public/assets/css/estilos.css         : Archivo CSS principal con la tipografía global, estilos del catálogo y de la página de inicio pública.
+public/assets/css/panel.css           : Archivo de estilos CSS utilizado para la maquetación de los paneles de control (dashboards) de los usuarios.
+public/assets/img/boyaca.png          : Imagen estática, posible logo secundario, banner o representación de región usada en la UI.
+public/assets/img/logo.png            : Archivo del logotipo principal utilizado a lo largo de la web, como en la barra de navegación.
+public/uploads/casa1.png...casa5.png  : Archivos de imágenes de ejemplo o reales de propiedades subidas al sistema.
+public/uploads/desktop.ini            : Archivo oculto generado por Windows, guarda configuraciones de visualización de la carpeta.
+
+/zDocumentation (Documentación Interna)
+---------------------------------------
+zDocumentation/DB_Design.html                    : Exportación o diagrama HTML que documenta la estructura y el diseño relacional de la base de datos.
+zDocumentation/foldermap.txt                     : Diagrama estructural en formato de árbol que explica el propósito de cada directorio de la aplicación.
+zDocumentation/futuro_cloud_plan.md              : Planificación, notas e ideas guardadas para el eventual despliegue de la aplicación a la nube.
+zDocumentation/implementation_plan.md.resolved   : Archivo histórico que conserva el estado resuelto de un plan de implementación previo.
+zDocumentation/instrucciones_correr_proyecto.txt : Guía detallada con los pasos para ejecutar la aplicación tanto localmente (XAMPP) como con Docker.
+zDocumentation/filemap.txt                       : Este archivo. Documento exhaustivo que lista y explica la responsabilidad individual de cada archivo en el proyecto.
