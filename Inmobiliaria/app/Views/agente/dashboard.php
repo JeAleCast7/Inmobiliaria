@@ -250,28 +250,32 @@
                     <h3 class="panel-section__title">Habilitar Pago a Cliente</h3>
                 </div>
 
-                <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div style="max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); padding: 32px; border-radius: 16px;">
                     <form action="<?php echo URL_ROOT; ?>/agente/habilitar-pago" method="POST">
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">Seleccionar Cliente</label>
-                            <select name="id_cliente" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="">-- Seleccione un cliente --</option>
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #a0b098; margin-bottom: 10px;">Seleccionar Cliente</label>
+                            <select name="id_cliente" required style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #e8e8e8; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease;">
+                                <option value="" style="background: #1a2e10; color: #e8e8e8;">-- Seleccione un cliente --</option>
                                 <?php foreach ($clientes as $c): ?>
-                                    <option value="<?php echo $c['id_cliente']; ?>"><?php echo htmlspecialchars($c['nombre'] . ' (' . $c['numero_documento'] . ')'); ?></option>
+                                    <option value="<?php echo $c['id_cliente']; ?>" style="background: #1a2e10; color: #e8e8e8;">
+                                        <?php echo htmlspecialchars($c['nombre'] . ' (' . $c['numero_documento'] . ')'); ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">Seleccionar Inmueble</label>
-                            <select name="id_inmueble" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="">-- Seleccione un inmueble --</option>
+                        <div style="margin-bottom: 32px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #a0b098; margin-bottom: 10px;">Seleccionar Inmueble</label>
+                            <select name="id_inmueble" required style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #e8e8e8; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease;">
+                                <option value="" style="background: #1a2e10; color: #e8e8e8;">-- Seleccione un inmueble --</option>
                                 <?php foreach ($inmuebles as $im): ?>
                                     <?php $precio = $im['precio_pub'] ?? $im['precio']; ?>
-                                    <option value="<?php echo $im['id_inmueble']; ?>"><?php echo htmlspecialchars($im['direccion'] . ' - $' . number_format($precio, 0, ',', '.')); ?></option>
+                                    <option value="<?php echo $im['id_inmueble']; ?>" style="background: #1a2e10; color: #e8e8e8;">
+                                        <?php echo htmlspecialchars($im['direccion'] . ' - $' . number_format($precio, 0, ',', '.')); ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <button type="submit" class="btn" style="width: 100%; justify-content: center;">Habilitar Pago</button>
+                        <button type="submit" class="btn-sm btn-sm--primary" style="width: 100%; padding: 14px; font-size: 15px;">Habilitar Pago Ficticio</button>
                     </form>
                 </div>
             </div>
