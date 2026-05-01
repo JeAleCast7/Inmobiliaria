@@ -67,6 +67,39 @@ class AgenteController extends BaseController
         $stmt->execute([$id_agente]);
         $data['reservas'] = $stmt->fetchAll();
 
+        // Get clients for payment enablement
+        $stmt = $this->db->query("SELECT id_cliente, nombre, numero_documento FROM clientes");
+        $data['clientes'] = $stmt->fetchAll();
+
         return $this->view('agente.dashboard', $data);
+    }
+
+    public function storeHabilitarPago()
+    {
+        $id_usuario = $_SESSION['id_usuario'];
+        $stmtAgent = $this->db->prepare("SELECT id_agente FROM agentes WHERE id_usuario = ?");
+        $stmtAgent->execute([$id_usuario]);
+        $agente = $stmtAgent->fetch();
+        if (!$agente) die("Agente no encontrado.");
+        $id_agente = $agente['id_agente'];
+
+        $id_cliente = $_POST['id_cliente'] ?? null;
+        $id_inmueble = $_POST['id_inmueble'] ?? null;
+
+        if (!$id_cliente || !$id_inmueble) {
+            die("Faltan datos.");
+        }
+
+        // Get property info
+        $stmt = $this->db->prepare("SELECT inv.precio, inv.tipo FROM inventario inv WHERE id_inmueble = ? AND inv.estado = 'activo'");
+        $stmt->execute([$id_inmueble]);
+        $inv = $stmt->fetch();
+        if (!$inv) die("Inmueble no válido o no en inventario activo.");
+
+        $stmtInsert = $this->db->prepare("INSERT INTO facturas (id_cliente, id_inmueble, id_agente, tipo, valor_total, estado) VALUES (?, ?, ?, ?, ?, 'pendiente')");
+        $stmtInsert->execute([$id_cliente, $id_inmueble, $id_agente, $inv['tipo'], $inv['precio']]);
+
+        header("Location: " . URL_ROOT . "/agente/dashboard?msg=pago_habilitado");
+        exit;
     }
 }

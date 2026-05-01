@@ -57,7 +57,11 @@ $router->get('/api/properties/featured', [PropertyController::class, 'getFeature
 // --- DASHBOARDS PROTEGIDOS ---
 $router->get('/admin/dashboard', [AdminController::class, 'dashboard']);
 $router->get('/agente/dashboard', [AgenteController::class, 'dashboard']);
+$router->post('/agente/habilitar-pago', [AgenteController::class, 'storeHabilitarPago']);
 $router->get('/cliente/dashboard', [ClienteController::class, 'dashboard']);
+$router->get('/cliente/pasarela-pago', [ClienteController::class, 'pasarelaPago']);
+$router->post('/cliente/procesar-pago', [ClienteController::class, 'procesarPago']);
+$router->get('/cliente/descargar-recibo', [ClienteController::class, 'descargarRecibo']);
 
 // Ejecutar el Router
 $router->resolve();

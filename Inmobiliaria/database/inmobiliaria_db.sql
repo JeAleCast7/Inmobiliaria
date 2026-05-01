@@ -185,6 +185,7 @@ CREATE TABLE IF NOT EXISTS facturas (
     id_reserva INT,
     tipo ENUM('venta', 'arriendo') NOT NULL,
     valor_total DECIMAL(15,2) NOT NULL,
+    estado ENUM('pendiente', 'pagada') NOT NULL DEFAULT 'pendiente',
     fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE,
     FOREIGN KEY (id_inmueble) REFERENCES inmuebles(id_inmueble) ON DELETE CASCADE,

@@ -32,6 +32,7 @@
         <li><a class="active" onclick="mostrar('dashboard', this)"><span class="icon">🏠</span> Inicio</a></li>
         <li><a onclick="mostrar('propiedades', this)"><span class="icon">🏢</span> Propiedades</a></li>
         <li><a onclick="mostrar('reservas', this)"><span class="icon">📋</span> Mis Reservas</a></li>
+        <li><a onclick="mostrar('facturas', this)"><span class="icon">🧾</span> Mis Facturas</a></li>
         <li><a onclick="mostrar('billetera', this)"><span class="icon">💳</span> Mi Billetera</a></li>
     </ul>
 
@@ -237,6 +238,39 @@
             </table>
         </div>
     </div>
+
+    <!-- Mis Facturas -->
+    <div id="facturas" style="display:none;">
+        <div class="panel-section">
+            <div class="panel-section__header">
+                <h3 class="panel-section__title">Mis Facturas y Pagos</h3>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Inmueble</th><th>Monto</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead>
+                <tbody>
+                    <?php if (!empty($facturas)): ?>
+                    <?php foreach ($facturas as $f): ?>
+                    <tr>
+                        <td><?php echo ucfirst($f['tipo_inmueble']) . ' - ' . htmlspecialchars($f['direccion']); ?></td>
+                        <td>$<?php echo number_format($f['valor_total'], 0, ',', '.'); ?></td>
+                        <td><span class="badge badge--<?php echo $f['estado'] === 'pagada' ? 'success' : 'warning'; ?>"><?php echo ucfirst($f['estado']); ?></span></td>
+                        <td><?php echo date('d/m/Y', strtotime($f['fecha'])); ?></td>
+                        <td>
+                            <?php if ($f['estado'] === 'pendiente'): ?>
+                                <a href="<?php echo URL_ROOT; ?>/cliente/pasarela-pago?id_factura=<?php echo $f['id_factura']; ?>" class="btn" style="padding: 5px 10px; font-size: 0.85rem;">Pagar ahora</a>
+                            <?php else: ?>
+                                <a href="<?php echo URL_ROOT; ?>/cliente/descargar-recibo?id_factura=<?php echo $f['id_factura']; ?>" target="_blank" class="btn btn--outline" style="padding: 5px 10px; font-size: 0.85rem;">💾 PDF</a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php else: ?>
+                    <tr><td colspan="5" style="text-align:center; color:#607050; padding:40px;">No tienes facturas generadas.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </main>
 
 <script>
@@ -244,7 +278,7 @@
 // Recibimos 'elemento' de forma explícita mediante 'this' en el HTML.
 // No usamos variables globales como 'event.currentTarget' porque navegadores rígidos (Brave/Firefox) las bloquean.
 function mostrar(seccion, elemento) {
-    ['dashboard', 'propiedades', 'reservas', 'billetera'].forEach(s => document.getElementById(s).style.display = 'none');
+    ['dashboard', 'propiedades', 'reservas', 'billetera', 'facturas'].forEach(s => document.getElementById(s).style.display = 'none');
     document.getElementById(seccion).style.display = 'block';
     
     document.querySelectorAll('.sidebar__menu a').forEach(a => a.classList.remove('active'));

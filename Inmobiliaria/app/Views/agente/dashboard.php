@@ -32,6 +32,7 @@
             <li><a onclick="mostrar('inmuebles', this)"><span class="icon">🏢</span> Mis Inmuebles</a></li>
             <li><a onclick="mostrar('reservas', this)"><span class="icon">📋</span> Mis Reservas</a></li>
             <li><a onclick="mostrar('billetera', this)"><span class="icon">💳</span> Mi Billetera</a></li>
+            <li><a onclick="mostrar('habilitar_pago', this)"><span class="icon">💸</span> Habilitar Pago</a></li>
         </ul>
 
         <div class="sidebar__logout">
@@ -241,11 +242,49 @@
                 </table>
             </div>
         </div>
+
+        <!-- Habilitar Pago -->
+        <div id="habilitar_pago" style="display:none;">
+            <div class="panel-section">
+                <div class="panel-section__header">
+                    <h3 class="panel-section__title">Habilitar Pago a Cliente</h3>
+                </div>
+                <?php if (isset($_GET['msg']) && $_GET['msg'] === 'pago_habilitado'): ?>
+                    <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        Pago habilitado para el cliente exitosamente. El cliente ahora verá el botón para pagar.
+                    </div>
+                <?php endif; ?>
+                <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <form action="<?php echo URL_ROOT; ?>/agente/habilitar-pago" method="POST">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">Seleccionar Cliente</label>
+                            <select name="id_cliente" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="">-- Seleccione un cliente --</option>
+                                <?php foreach ($clientes as $c): ?>
+                                    <option value="<?php echo $c['id_cliente']; ?>"><?php echo htmlspecialchars($c['nombre'] . ' (' . $c['numero_documento'] . ')'); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">Seleccionar Inmueble</label>
+                            <select name="id_inmueble" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="">-- Seleccione un inmueble --</option>
+                                <?php foreach ($inmuebles as $im): ?>
+                                    <?php $precio = $im['precio_pub'] ?? $im['precio']; ?>
+                                    <option value="<?php echo $im['id_inmueble']; ?>"><?php echo htmlspecialchars($im['direccion'] . ' - $' . number_format($precio, 0, ',', '.')); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn" style="width: 100%; justify-content: center;">Habilitar Pago</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
         function mostrar(seccion, elemento) {
-            ['dashboard', 'inmuebles', 'reservas', 'billetera'].forEach(s => {
+            ['dashboard', 'inmuebles', 'reservas', 'billetera', 'habilitar_pago'].forEach(s => {
                 const el = document.getElementById(s);
                 if (el) el.style.display = 'none';
             });
