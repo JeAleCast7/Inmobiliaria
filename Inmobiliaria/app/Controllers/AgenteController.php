@@ -96,6 +96,14 @@ class AgenteController extends BaseController
         $inv = $stmt->fetch();
         if (!$inv) die("Inmueble no válido o no en inventario activo.");
 
+        // Check if already enabled
+        $stmtCheck = $this->db->prepare("SELECT id_factura FROM facturas WHERE id_cliente = ? AND id_inmueble = ?");
+        $stmtCheck->execute([$id_cliente, $id_inmueble]);
+        if ($stmtCheck->fetch()) {
+            header("Location: " . URL_ROOT . "/agente/dashboard?msg=ya_habilitado");
+            exit;
+        }
+
         $stmtInsert = $this->db->prepare("INSERT INTO facturas (id_cliente, id_inmueble, id_agente, tipo, valor_total, estado) VALUES (?, ?, ?, ?, ?, 'pendiente')");
         $stmtInsert->execute([$id_cliente, $id_inmueble, $id_agente, $inv['tipo'], $inv['precio']]);
 

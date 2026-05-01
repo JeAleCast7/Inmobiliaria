@@ -249,11 +249,7 @@
                 <div class="panel-section__header">
                     <h3 class="panel-section__title">Habilitar Pago a Cliente</h3>
                 </div>
-                <?php if (isset($_GET['msg']) && $_GET['msg'] === 'pago_habilitado'): ?>
-                    <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                        Pago habilitado para el cliente exitosamente. El cliente ahora verá el botón para pagar.
-                    </div>
-                <?php endif; ?>
+
                 <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <form action="<?php echo URL_ROOT; ?>/agente/habilitar-pago" method="POST">
                         <div style="margin-bottom: 20px;">
@@ -417,6 +413,35 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        <?php if (isset($_GET['msg']) && in_array($_GET['msg'], ['pago_habilitado', 'ya_habilitado'])): ?>
+            document.addEventListener('DOMContentLoaded', function() {
+                mostrar('habilitar_pago', document.querySelector('a[onclick*="habilitar_pago"]'));
+                
+                <?php if ($_GET['msg'] === 'pago_habilitado'): ?>
+                    Swal.fire({
+                        title: '¡Habilitado!',
+                        text: 'Pago habilitado para el cliente exitosamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#607050'
+                    });
+                <?php elseif ($_GET['msg'] === 'ya_habilitado'): ?>
+                    Swal.fire({
+                        title: 'Aviso',
+                        text: 'El inmueble ya está habilitado para este cliente.',
+                        icon: 'warning',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#607050'
+                    });
+                <?php endif; ?>
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>
