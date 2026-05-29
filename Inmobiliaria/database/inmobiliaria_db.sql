@@ -243,26 +243,4 @@ VALUES (3, 'Laura García', 'CC', 1030456789, 3205550002, 'laura@agentebre.com',
 
 -- Billetera agente 2
 INSERT INTO billetera_agente (id_agente, saldo, estado) VALUES (2, 0, 'activa');
-
--- Inmuebles de ejemplo
-INSERT INTO inmuebles (id_agente, tipo, precio, direccion, area_m2, habitaciones, banos, estrato, estado, descripcion, id_inmobiliaria) VALUES
-(1, 'casa', 450000000, 'Calle 85 #12-45, Bogotá', 180.00, 4, 3, 5, 'disponible', 'Hermosa casa en zona residencial con jardín amplio, cocina integral, sala de estar y garaje doble. Excelente ubicación cerca de centros comerciales y transporte público.', 1),
-(1, 'apartamento', 280000000, 'Carrera 7 #72-15, Bogotá', 95.00, 3, 2, 4, 'disponible', 'Moderno apartamento con vista panorámica, balcón amplio, zona de lavandería y parqueadero cubierto. Conjunto con piscina y gimnasio.', 1),
-(2, 'oficina', 520000000, 'Avenida El Dorado #68-30, Bogotá', 250.00, 0, 2, 6, 'disponible', 'Amplia oficina corporativa en zona empresarial. Acabados de lujo, sistema de aire acondicionado central, 5 parqueaderos.', 1),
-(2, 'apartamento', 195000000, 'Calle 53 #20-10, Bogotá', 72.00, 2, 1, 3, 'disponible', 'Apartamento acogedor ideal para pareja o persona sola. Cocina abierta, excelente iluminación natural. Cerca al Transmilenio.', 1),
-(1, 'local', 380000000, 'Carrera 15 #93-20, Bogotá', 120.00, 0, 1, 5, 'disponible', 'Local comercial en esquina con alto flujo peatonal. Ideal para restaurante o tienda. Doble vitrina y mezzanine.', 1),
-(2, 'casa', 650000000, 'Calle 134 #9-50, Bogotá', 320.00, 5, 4, 6, 'disponible', 'Casa campestre con amplio jardín, piscina privada, BBQ, estudio independiente. Conjunto cerrado con seguridad 24/7.', 1);
-
--- Inventario para los inmuebles
-INSERT INTO inventario (id_inmueble, id_inmobiliaria, estado, tipo, precio, descripcion) VALUES
-(1, 1, 'activo', 'venta', 450000000, 'Casa familiar en excelente ubicación'),
-(2, 1, 'activo', 'venta', 280000000, 'Apartamento moderno con amenidades'),
-(3, 1, 'activo', 'venta', 520000000, 'Oficina corporativa premium'),
-(4, 1, 'activo', 'arriendo', 1800000, 'Apartamento en arriendo mensual'),
-(5, 1, 'activo', 'venta', 380000000, 'Local comercial estratégico'),
-(6, 1, 'activo', 'venta', 650000000, 'Casa campestre de lujo');
-
---PARA AGREGAR LAS FOTOS A LOS INMUEBLES
-UPDATE inventario
-SET fotos = '["uploads\/casa1.png","uploads\/casa2.png","uploads\/casa3.png","uploads\/casa4.png","uploads\/casa5.png"]'
-WHERE id_inventario = 1;
+

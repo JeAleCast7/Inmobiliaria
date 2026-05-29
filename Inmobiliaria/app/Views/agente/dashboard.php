@@ -33,6 +33,7 @@
             <li><a onclick="mostrar('reservas', this)"><span class="icon">📋</span> Mis Reservas</a></li>
             <li><a onclick="mostrar('billetera', this)"><span class="icon">💳</span> Mi Billetera</a></li>
             <li><a onclick="mostrar('habilitar_pago', this)"><span class="icon">💸</span> Habilitar Pago</a></li>
+            <li><a onclick="mostrar('agendar_reserva', this)"><span class="icon">📅</span> Agendar Reserva</a></li>
         </ul>
 
         <div class="sidebar__logout">
@@ -95,6 +96,12 @@
                             $icono = $iconos_tipo[$im['tipo']] ?? '🏠';
                             $tipo_op = $im['tipo_operacion'] ?? 'venta';
                             $precio = $im['precio_pub'] ?? $im['precio'];
+                            $fotos_raw = $im['fotos'] ?? '[]';
+                            $fotos_arr = json_decode($fotos_raw, true) ?: [];
+                            $primera_foto = !empty($fotos_arr) ? $fotos_arr[0] : '';
+                            if ($primera_foto && strpos($primera_foto, 'http') === false) {
+                                $primera_foto = URL_ROOT . '/' . ltrim($primera_foto, '/');
+                            }
                             ?>
                             <article class="catalog-card" style="cursor:pointer;" onclick="openPropertyModalFromData({
                     desc: '<?php echo addslashes($im['descripcion']); ?>',
@@ -103,10 +110,10 @@
                     baths: '<?php echo $im['banos']; ?>',
                     area: '<?php echo $im['area_m2']; ?>',
                     phone: '<?php echo $agente['telefono']; ?>',
-                    images: '<?php echo str_replace("'", "\\'", $im['fotos'] ?? '[]'); ?>'
+                    images: '<?php echo str_replace("'", "\\'", $fotos_raw); ?>'
                 })">
-                                <div class="catalog-card__image">
-                                    <?php echo $icono; ?>
+                                <div class="catalog-card__image" <?php echo $primera_foto ? 'style="background-image: url(\'' . htmlspecialchars($primera_foto) . '\'); background-size: cover; background-position: center;"' : ''; ?>>
+                                    <?php echo $primera_foto ? '' : $icono; ?>
                                     <span class="catalog-card__badge catalog-card__badge--<?php echo $tipo_op; ?>">
                                         <?php echo ucfirst($tipo_op); ?>
                                     </span>
@@ -249,42 +256,118 @@
                 <div class="panel-section__header">
                     <h3 class="panel-section__title">Habilitar Pago a Cliente</h3>
                 </div>
-
-                <div style="max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); padding: 32px; border-radius: 16px;">
+                <div class="form-container">
                     <form action="<?php echo URL_ROOT; ?>/agente/habilitar-pago" method="POST">
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #a0b098; margin-bottom: 10px;">Seleccionar Cliente</label>
-                            <select name="id_cliente" required style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #e8e8e8; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease;">
-                                <option value="" style="background: #1a2e10; color: #e8e8e8;">-- Seleccione un cliente --</option>
+                        <h3 class="form-section-title" style="margin-top:0;">1. Seleccionar Cliente</h3>
+                        <div class="form-group">
+                            <label for="hp_cliente">Cliente</label>
+                            <select name="id_cliente" id="hp_cliente" class="form-control" required>
+                                <option value="">-- Seleccione un cliente --</option>
                                 <?php foreach ($clientes as $c): ?>
-                                    <option value="<?php echo $c['id_cliente']; ?>" style="background: #1a2e10; color: #e8e8e8;">
+                                    <option value="<?php echo $c['id_cliente']; ?>">
                                         <?php echo htmlspecialchars($c['nombre'] . ' (' . $c['numero_documento'] . ')'); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div style="margin-bottom: 32px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #a0b098; margin-bottom: 10px;">Seleccionar Inmueble</label>
-                            <select name="id_inmueble" required style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #e8e8e8; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease;">
-                                <option value="" style="background: #1a2e10; color: #e8e8e8;">-- Seleccione un inmueble --</option>
+                        <h3 class="form-section-title">2. Seleccionar Inmueble</h3>
+                        <div class="form-group">
+                            <label for="hp_inmueble">Inmueble Asignado</label>
+                            <select name="id_inmueble" id="hp_inmueble" class="form-control" required>
+                                <option value="">-- Seleccione un inmueble --</option>
                                 <?php foreach ($inmuebles as $im): ?>
                                     <?php $precio = $im['precio_pub'] ?? $im['precio']; ?>
-                                    <option value="<?php echo $im['id_inmueble']; ?>" style="background: #1a2e10; color: #e8e8e8;">
-                                        <?php echo htmlspecialchars($im['direccion'] . ' - $' . number_format($precio, 0, ',', '.')); ?>
+                                    <option value="<?php echo $im['id_inmueble']; ?>">
+                                        <?php echo htmlspecialchars($im['direccion'] . ' — $' . number_format($precio, 0, ',', '.')); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <button type="submit" class="btn-sm btn-sm--primary" style="width: 100%; padding: 14px; font-size: 15px;">Habilitar Pago Ficticio</button>
+                        <div class="form-group" style="margin-top:32px;">
+                            <button type="submit" class="btn-submit">💸 Habilitar Pago Ficticio</button>
+                        </div>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        <!-- Agendar Reserva -->
+        <div id="agendar_reserva" style="display:none;">
+            <div class="main__header">
+                <h1>Agendar Reserva de Visita</h1>
+                <p>Asigna una visita a un cliente para uno de tus inmuebles y programa la fecha de visita.</p>
+            </div>
+            <div class="form-container">
+                <form action="<?php echo URL_ROOT; ?>/agente/agendar-reserva" method="POST">
+                    <h3 class="form-section-title" style="margin-top:0;">1. Datos de la Reserva</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ar_cliente">Cliente</label>
+                            <select name="id_cliente" id="ar_cliente" class="form-control" required>
+                                <option value="">-- Seleccione un cliente --</option>
+                                <?php foreach ($clientes as $c): ?>
+                                    <option value="<?php echo $c['id_cliente']; ?>">
+                                        <?php echo htmlspecialchars($c['nombre'] . ' (' . $c['numero_documento'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ar_inmueble">Inmueble Asignado</label>
+                            <select name="id_inmueble" id="ar_inmueble" class="form-control" required>
+                                <option value="">-- Seleccione un inmueble --</option>
+                                <?php foreach ($inmuebles as $im): ?>
+                                    <option value="<?php echo $im['id_inmueble']; ?>">
+                                        <?php echo htmlspecialchars(ucfirst($im['tipo']) . ' — ' . $im['direccion']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3 class="form-section-title">2. Fecha y Hora de Visita</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ar_fecha">Fecha y Hora de la Visita</label>
+                            <input type="datetime-local" name="fecha_visita" id="ar_fecha" class="form-control">
+                            <small style="color:#a0b098; font-size:12px; margin-top:6px; display:block;">Opcional — deja en blanco si la fecha aún está por definir.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div style="background: rgba(200,164,21,0.07); border: 1px solid rgba(200,164,21,0.2); border-radius: 10px; padding: 16px; font-size: 13px; color: #a0b098; line-height: 1.6;">
+                                📋 La reserva se creará en estado <strong style="color:#c8a415;">Pendiente</strong>.<br>
+                                El cliente podrá consultar el estado desde su panel en <em>Mis Reservas</em>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top:32px;">
+                        <button type="submit" class="btn-submit">📅 Crear Reserva de Visita</button>
+                    </div>
+                </form>
             </div>
         </div>
     </main>
 
     <script>
+        // Fijar fecha mínima del input de visita al momento actual
+        (function () {
+            const input = document.getElementById('ar_fecha');
+            if (input) {
+                const now = new Date();
+                // Ajustar a la zona horaria local y formatear como "YYYY-MM-DDTHH:MM"
+                const pad = n => String(n).padStart(2, '0');
+                const localISO = now.getFullYear() + '-' +
+                    pad(now.getMonth() + 1) + '-' +
+                    pad(now.getDate()) + 'T' +
+                    pad(now.getHours()) + ':' +
+                    pad(now.getMinutes());
+                input.min = localISO;
+            }
+        })();
+
         function mostrar(seccion, elemento) {
-            ['dashboard', 'inmuebles', 'reservas', 'billetera', 'habilitar_pago'].forEach(s => {
+            ['dashboard', 'inmuebles', 'reservas', 'billetera', 'habilitar_pago', 'agendar_reserva'].forEach(s => {
                 const el = document.getElementById(s);
                 if (el) el.style.display = 'none';
             });
@@ -330,7 +413,16 @@
             if (!Array.isArray(currentModalImages) || currentModalImages.length === 0) {
                 currentModalImages = ['<?php echo URL_ROOT; ?>/assets/img/logo.png'];
             } else {
-                currentModalImages = currentModalImages.map(img => '<?php echo URL_ROOT; ?>/' + img);
+                currentModalImages = currentModalImages.map(img => {
+                    if (!img) return '<?php echo URL_ROOT; ?>/assets/img/logo.png';
+                    if (img.indexOf('http://') === 0 || img.indexOf('https://') === 0) {
+                        return img;
+                    }
+                    if (img.startsWith('/')) {
+                        img = img.substring(1);
+                    }
+                    return '<?php echo URL_ROOT; ?>/' + img;
+                });
             }
             currentImageIndex = 0;
             updateModalImage();
@@ -419,29 +511,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        <?php if (isset($_GET['msg']) && in_array($_GET['msg'], ['pago_habilitado', 'ya_habilitado'])): ?>
+        <?php if (isset($_GET['msg']) && in_array($_GET['msg'], ['pago_habilitado', 'ya_habilitado', 'reserva_creada', 'reserva_error'])): ?>
             document.addEventListener('DOMContentLoaded', function() {
+                <?php if (in_array($_GET['msg'], ['pago_habilitado', 'ya_habilitado'])): ?>
                 mostrar('habilitar_pago', document.querySelector('a[onclick*="habilitar_pago"]'));
-                
-                <?php if ($_GET['msg'] === 'pago_habilitado'): ?>
-                    Swal.fire({
-                        title: '¡Habilitado!',
-                        text: 'Pago habilitado para el cliente exitosamente.',
-                        icon: 'success',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#607050'
-                    });
-                <?php elseif ($_GET['msg'] === 'ya_habilitado'): ?>
-                    Swal.fire({
-                        title: 'Aviso',
-                        text: 'El inmueble ya está habilitado para este cliente.',
-                        icon: 'warning',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#607050'
-                    });
+                <?php elseif (in_array($_GET['msg'], ['reserva_creada', 'reserva_error'])): ?>
+                mostrar('agendar_reserva', document.querySelector('a[onclick*="agendar_reserva"]'));
                 <?php endif; ?>
-                
-                // Clean up URL
+
+                <?php if ($_GET['msg'] === 'pago_habilitado'): ?>
+                    Swal.fire({ title: '¡Habilitado!', text: 'Pago habilitado para el cliente exitosamente.', icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#607050' });
+                <?php elseif ($_GET['msg'] === 'ya_habilitado'): ?>
+                    Swal.fire({ title: 'Aviso', text: 'El inmueble ya está habilitado para este cliente.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#607050' });
+                <?php elseif ($_GET['msg'] === 'reserva_creada'): ?>
+                    Swal.fire({ title: '¡Reserva Creada!', text: 'La reserva de visita fue agendada exitosamente.', icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#607050' });
+                <?php elseif ($_GET['msg'] === 'reserva_error'): ?>
+                    Swal.fire({ title: 'Error', text: 'Ocurrió un error al agendar la reserva. Verifica los datos.', icon: 'error', confirmButtonText: 'Aceptar', confirmButtonColor: '#607050' });
+                <?php endif; ?>
+
                 window.history.replaceState({}, document.title, window.location.pathname);
             });
         <?php endif; ?>

@@ -300,7 +300,7 @@ CREATE TABLE `inmuebles` (
 
 LOCK TABLES `inmuebles` WRITE;
 /*!40000 ALTER TABLE `inmuebles` DISABLE KEYS */;
-INSERT INTO `inmuebles` VALUES (1,1,'casa',450000000.00,'Calle 85 #12-45, Bogot├í',180.00,4,3,5,'disponible','Hermosa casa en zona residencial con jard├¡n amplio, cocina integral, sala de estar y garaje doble. Excelente ubicaci├│n cerca de centros comerciales y transporte p├║blico.','2026-03-14 20:21:47',1),(2,1,'apartamento',280000000.00,'Carrera 7 #72-15, Bogot├í',95.00,3,2,4,'disponible','Moderno apartamento con vista panor├ímica, balc├│n amplio, zona de lavander├¡a y parqueadero cubierto. Conjunto con piscina y gimnasio.','2026-03-14 20:21:47',1),(3,2,'oficina',520000000.00,'Avenida El Dorado #68-30, Bogot├í',250.00,0,2,6,'disponible','Amplia oficina corporativa en zona empresarial. Acabados de lujo, sistema de aire acondicionado central, 5 parqueaderos.','2026-03-14 20:21:47',1),(4,2,'apartamento',195000000.00,'Calle 53 #20-10, Bogot├í',72.00,2,1,3,'disponible','Apartamento acogedor ideal para pareja o persona sola. Cocina abierta, excelente iluminaci├│n natural. Cerca al Transmilenio.','2026-03-14 20:21:47',1),(5,1,'local',380000000.00,'Carrera 15 #93-20, Bogot├í',120.00,0,1,5,'disponible','Local comercial en esquina con alto flujo peatonal. Ideal para restaurante o tienda. Doble vitrina y mezzanine.','2026-03-14 20:21:47',1),(6,2,'casa',650000000.00,'Calle 134 #9-50, Bogot├í',320.00,5,4,6,'disponible','Casa campestre con amplio jard├¡n, piscina privada, BBQ, estudio independiente. Conjunto cerrado con seguridad 24/7.','2026-03-14 20:21:47',1);
+
 /*!40000 ALTER TABLE `inmuebles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -335,7 +335,7 @@ CREATE TABLE `inventario` (
 
 LOCK TABLES `inventario` WRITE;
 /*!40000 ALTER TABLE `inventario` DISABLE KEYS */;
-INSERT INTO `inventario` VALUES (1,1,1,'activo','venta',450000000.00,'2026-03-14 20:21:47','Casa familiar en excelente ubicaci├│n','[\"uploads\\/casa1.png\",\"uploads\\/casa2.png\",\"uploads\\/casa3.png\",\"uploads\\/casa4.png\",\"uploads\\/casa5.png\"]'),(2,2,1,'activo','venta',280000000.00,'2026-03-14 20:21:47','Apartamento moderno con amenidades',NULL),(3,3,1,'activo','venta',520000000.00,'2026-03-14 20:21:47','Oficina corporativa premium',NULL),(4,4,1,'activo','arriendo',1800000.00,'2026-03-14 20:21:47','Apartamento en arriendo mensual',NULL),(5,5,1,'activo','venta',380000000.00,'2026-03-14 20:21:47','Local comercial estrat├⌐gico',NULL),(6,6,1,'activo','venta',650000000.00,'2026-03-14 20:21:47','Casa campestre de lujo',NULL);
+
 /*!40000 ALTER TABLE `inventario` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -177,28 +177,78 @@
             <div class="panel-section__header">
                 <h3 class="panel-section__title">Mis Reservas</h3>
             </div>
-            <table class="data-table">
-                <thead><tr><th>Inmueble</th><th>Precio</th><th>Agente</th><th>Estado</th><th>Fecha Reserva</th><th>Fecha Visita</th></tr></thead>
-                <tbody>
-                    <?php if (!empty($reservas)): ?>
-                    <?php foreach ($reservas as $r): ?>
-                    <tr>
-                        <td><?php echo ucfirst($r['tipo_inmueble']) . ' - ' . htmlspecialchars($r['direccion']); ?></td>
-                        <td>$<?php echo number_format($r['precio'], 0, ',', '.'); ?></td>
-                        <td><?php echo htmlspecialchars($r['agente_nombre'] ?? '—'); ?></td>
-                        <td><span class="badge badge--<?php 
-                            $badge_cl = ['pendiente' => 'warning', 'confirmada' => 'success', 'cancelada' => 'danger'];
-                            echo $badge_cl[$r['estado']] ?? 'info';
-                        ?>"><?php echo ucfirst($r['estado']); ?></span></td>
-                        <td><?php echo date('d/m/Y', strtotime($r['fecha_reserva'])); ?></td>
-                        <td><?php echo $r['fecha_visita'] ? date('d/m/Y H:i', strtotime($r['fecha_visita'])) : 'Por definir'; ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                    <?php else: ?>
-                    <tr><td colspan="6" style="text-align:center; color:#607050; padding:40px;">No tienes reservas aún. ¡Explora las propiedades!</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+            <?php if (!empty($reservas)): ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
+                <?php
+                $badge_cl = ['pendiente' => 'warning', 'confirmada' => 'success', 'cancelada' => 'danger', 'finalizada' => 'info'];
+                $icon_tipo = ['casa' => '🏠', 'apartamento' => '🏢', 'oficina' => '🏛️', 'local' => '🏪', 'lote' => '📐', 'bodega' => '🏭'];
+                foreach ($reservas as $r):
+                    $estado_class = $badge_cl[$r['estado']] ?? 'info';
+                    $icono = $icon_tipo[$r['tipo_inmueble']] ?? '🏠';
+                ?>
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; transition: all 0.3s ease;" onmouseover="this.style.borderColor='rgba(200,164,21,0.25)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 28px rgba(0,0,0,0.25)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <!-- Header de la card -->
+                    <div style="background: linear-gradient(135deg, #1b3a0e, #2d5016); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 32px;"><?php echo $icono; ?></span>
+                            <div>
+                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #c8a415; margin-bottom: 2px;"><?php echo ucfirst($r['tipo_inmueble']); ?></div>
+                                <div style="font-size: 14px; font-weight: 600; color: #ffffff;"><?php echo htmlspecialchars($r['direccion']); ?></div>
+                            </div>
+                        </div>
+                        <span class="badge badge--<?php echo $estado_class; ?>" style="font-size: 11px;"><?php echo ucfirst($r['estado']); ?></span>
+                    </div>
+                    <!-- Body de la card -->
+                    <div style="padding: 20px 24px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div>
+                                <div style="font-size: 11px; color: #607050; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">💰 Precio</div>
+                                <div style="font-size: 16px; font-weight: 700; color: #c8a415; font-family: 'Playfair Display', serif;">$<?php echo number_format($r['precio'], 0, ',', '.'); ?></div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; color: #607050; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">👔 Agente</div>
+                                <div style="font-size: 14px; color: #c0d0b8;"><?php echo htmlspecialchars($r['agente_nombre'] ?? '—'); ?></div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; color: #607050; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">📅 Reserva</div>
+                                <div style="font-size: 14px; color: #c0d0b8;"><?php echo date('d/m/Y', strtotime($r['fecha_reserva'])); ?></div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; color: #607050; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">🕐 Visita</div>
+                                <div style="font-size: 14px; color: <?php echo $r['fecha_visita'] ? '#4ade80' : '#a0b098'; ?>;">
+                                    <?php echo $r['fecha_visita'] ? date('d/m/Y H:i', strtotime($r['fecha_visita'])) : 'Por definir'; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php if ($r['estado'] === 'pendiente'): ?>
+                        <div style="background: rgba(200,164,21,0.07); border: 1px solid rgba(200,164,21,0.15); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #a0b098;">
+                            ⏳ Tu reserva está siendo revisada por tu agente.
+                        </div>
+                        <?php elseif ($r['estado'] === 'confirmada'): ?>
+                        <div style="background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.15); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #a0b098;">
+                            ✅ Reserva confirmada. ¡Prepárate para tu visita!
+                        </div>
+                        <?php elseif ($r['estado'] === 'cancelada'): ?>
+                        <div style="background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.15); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #a0b098;">
+                            ❌ Esta reserva fue cancelada.
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 56px; margin-bottom: 16px;">📋</div>
+                <div style="font-size: 18px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">No tienes reservas aún</div>
+                <div style="font-size: 14px; color: #607050;">¡Explora las propiedades disponibles y solicita una visita con tu agente!</div>
+                <div style="margin-top: 24px;">
+                    <a onclick="mostrar('propiedades', document.querySelector('a[onclick*=\'propiedades\']'))" style="display:inline-flex; align-items:center; gap:8px; background: linear-gradient(135deg,#c8a415,#b89a0d); color:#1a2e10; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; transition: box-shadow 0.2s;">
+                        🏢 Ver Propiedades Disponibles
+                    </a>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -324,9 +374,18 @@ function openPropertyModal(card) {
         currentModalImages = [];
     }
     if (!Array.isArray(currentModalImages) || currentModalImages.length === 0) {
-        currentModalImages = ['../img/logo.png'];
+        currentModalImages = ['<?php echo URL_ROOT; ?>/assets/img/logo.png'];
     } else {
-        currentModalImages = currentModalImages.map(img => '../' + img);
+        currentModalImages = currentModalImages.map(img => {
+            if (!img) return '<?php echo URL_ROOT; ?>/assets/img/logo.png';
+            if (img.indexOf('http://') === 0 || img.indexOf('https://') === 0) {
+                return img;
+            }
+            if (img.startsWith('/')) {
+                img = img.substring(1);
+            }
+            return '<?php echo URL_ROOT; ?>/' + img;
+        });
     }
     currentImageIndex = 0;
     updateModalImage();

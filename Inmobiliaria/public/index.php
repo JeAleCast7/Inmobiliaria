@@ -23,9 +23,15 @@ $envPath = __DIR__ . '/../.env';
 if (file_exists($envPath)) {
     $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        list($name, $value) = explode('=', $line, 2);
-        putenv(trim($name) . "=" . trim($value));
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        [$name, $value] = explode('=', $line, 2);
+        $name  = trim($name);
+        $value = trim($value, " \t\n\r\0\x0B\"\'`");
+        putenv("{$name}={$value}");
+        $_ENV[$name]   = $value;
+        $_SERVER[$name] = $value;
     }
 }
 
@@ -56,8 +62,21 @@ $router->get('/api/properties/featured', [PropertyController::class, 'getFeature
 
 // --- DASHBOARDS PROTEGIDOS ---
 $router->get('/admin/dashboard', [AdminController::class, 'dashboard']);
+$router->get('/admin/inmuebles/crear', [AdminController::class, 'createInmueble']);
+$router->post('/admin/inmuebles/store', [AdminController::class, 'storeInmueble']);
+$router->get('/admin/inmuebles/editar', [AdminController::class, 'editInmueble']);
+$router->post('/admin/inmuebles/update', [AdminController::class, 'updateInmueble']);
+$router->post('/admin/inmuebles/eliminar', [AdminController::class, 'deleteInmueble']);
+$router->get('/admin/agentes/crear', [AdminController::class, 'createAgente']);
+$router->post('/admin/agentes/store', [AdminController::class, 'storeAgente']);
+$router->get('/admin/agentes/editar', [AdminController::class, 'editAgente']);
+$router->post('/admin/agentes/update', [AdminController::class, 'updateAgente']);
+$router->post('/admin/agentes/eliminar', [AdminController::class, 'deleteAgente']);
+$router->post('/admin/clientes/eliminar', [AdminController::class, 'deleteCliente']);
+$router->get('/admin/facturas/recibo', [AdminController::class, 'descargarRecibo']);
 $router->get('/agente/dashboard', [AgenteController::class, 'dashboard']);
 $router->post('/agente/habilitar-pago', [AgenteController::class, 'storeHabilitarPago']);
+$router->post('/agente/agendar-reserva', [AgenteController::class, 'storeReserva']);
 $router->get('/cliente/dashboard', [ClienteController::class, 'dashboard']);
 $router->get('/cliente/pasarela-pago', [ClienteController::class, 'pasarelaPago']);
 $router->post('/cliente/procesar-pago', [ClienteController::class, 'procesarPago']);

@@ -217,8 +217,9 @@
         <!-- Agentes -->
         <div id="agentes" style="display:none;">
             <div class="panel-section">
-                <div class="panel-section__header">
+                <div class="panel-section__header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h3 class="panel-section__title">Gestión de Agentes</h3>
+                    <a href="<?php echo URL_ROOT; ?>/admin/agentes/crear" style="background-color: #607050; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">+ Agregar Nuevo Agente</a>
                 </div>
                 <table class="data-table">
                     <thead>
@@ -229,6 +230,7 @@
                             <th>Cargo</th>
                             <th>Teléfono</th>
                             <th>Estado</th>
+                            <th style="width: 150px; text-align: center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -244,12 +246,20 @@
                                     <td><span
                                             class="badge badge--<?php echo $a['activo'] ? 'success' : 'danger'; ?>"><?php echo $a['activo'] ? 'Activo' : 'Inactivo'; ?></span>
                                     </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                            <a href="<?php echo URL_ROOT; ?>/admin/agentes/editar?id=<?php echo $a['id_agente']; ?>" class="btn--edit" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; line-height: 1; min-height: auto; font-weight: 500;">Editar</a>
+                                            <form action="<?php echo URL_ROOT; ?>/admin/agentes/eliminar" method="POST" style="margin: 0; display: inline-block;" onsubmit="return confirm('¿Estás seguro de eliminar a este agente? Esto también eliminará su cuenta de usuario y billetera asociadas.');">
+                                                <input type="hidden" name="id_agente" value="<?php echo $a['id_agente']; ?>">
+                                                <button type="submit" class="btn--delete" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; background: transparent; line-height: 1; min-height: auto; font-weight: 500;">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" style="text-align:center; color:#607050; padding:40px;">No hay agentes
-                                    registrados</td>
+                                <td colspan="7" style="text-align:center; color:#607050; padding:40px;">No hay agentes registrados</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -272,6 +282,7 @@
                             <th>Teléfono</th>
                             <th>Dirección</th>
                             <th>Fecha</th>
+                            <th style="width: 100px; text-align: center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -285,11 +296,19 @@
                                     <td><?php echo htmlspecialchars($cl['telefono']); ?></td>
                                     <td><?php echo htmlspecialchars($cl['direccion']); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($cl['fecha_registro'])); ?></td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                            <form action="<?php echo URL_ROOT; ?>/admin/clientes/eliminar" method="POST" style="margin: 0; display: inline-block;" onsubmit="return confirm('¿Estás seguro de eliminar a este cliente? Esto también eliminará su billetera virtual, reservas y facturas asociadas de forma irreversible.');">
+                                                <input type="hidden" name="id_cliente" value="<?php echo $cl['id_cliente']; ?>">
+                                                <button type="submit" class="btn--delete" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; background: transparent; line-height: 1; min-height: auto; font-weight: 500;">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" style="text-align:center; color:#607050; padding:40px;">No hay clientes
+                                <td colspan="7" style="text-align:center; color:#607050; padding:40px;">No hay clientes
                                     registrados</td>
                             </tr>
                         <?php endif; ?>
@@ -301,8 +320,9 @@
         <!-- Inmuebles — Catálogo -->
     <div id="inmuebles" style="display:none;">
         <div class="panel-section">
-            <div class="panel-section__header">
+            <div class="panel-section__header" style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 class="panel-section__title">Gestión de Inmuebles</h3>
+                <a href="<?php echo URL_ROOT; ?>/admin/inmuebles/crear" style="background-color: #607050; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">+ Agregar Nuevo Inmueble</a>
             </div>
             <?php
             $iconos_tipo = [
@@ -324,15 +344,15 @@
                         $primera_foto = URL_ROOT . '/' . $primera_foto;
                     }
                 ?>
-                <article class="catalog-card" style="cursor:pointer;" onclick="openPropertyModalFromData({
-                    desc: '<?php echo addslashes($im['descripcion']); ?>',
-                    price: '<?php echo number_format($precio, 0, ',', '.'); ?>',
-                    beds: '<?php echo $im['habitaciones']; ?>',
-                    baths: '<?php echo $im['banos']; ?>',
-                    area: '<?php echo $im['area_m2']; ?>',
-                    phone: '<?php echo addslashes($im['agente_telefono'] ?? ''); ?>',
-                    images: '<?php echo str_replace("'", "\\'", $fotos_json); ?>'
-                })">
+                <article class="catalog-card" style="cursor:pointer;" onclick="openPropertyModal(this)"
+                    data-id="<?php echo $im['id_inmueble']; ?>"
+                    data-desc="<?php echo htmlspecialchars($im['descripcion'], ENT_QUOTES, 'UTF-8'); ?>"
+                    data-price="<?php echo number_format($precio, 0, ',', '.'); ?>"
+                    data-beds="<?php echo $im['habitaciones']; ?>"
+                    data-baths="<?php echo $im['banos']; ?>"
+                    data-area="<?php echo $im['area_m2']; ?>"
+                    data-phone="<?php echo htmlspecialchars($im['agente_telefono'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    data-images="<?php echo htmlspecialchars($fotos_json, ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="catalog-card__image" <?php echo $primera_foto ? 'style="background-image: url(\''.htmlspecialchars($primera_foto).'\'); background-size: cover; background-position: center;"' : ''; ?>>
                         <?php echo $primera_foto ? '' : $icono; ?>
                         <span class="catalog-card__badge catalog-card__badge--<?php echo $im['estado'] == 'disponible' ? 'venta' : 'arriendo'; ?>">
@@ -428,6 +448,8 @@
                             <th>Tipo</th>
                             <th>Valor</th>
                             <th>Fecha</th>
+                            <th>Estado</th>
+                            <th style="width: 150px; text-align: center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -439,11 +461,25 @@
                                     <td><?php echo ucfirst($fa['tipo']); ?></td>
                                     <td>$<?php echo number_format($fa['valor_total'], 0, ',', '.'); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($fa['fecha'])); ?></td>
+                                    <td>
+                                        <span class="badge badge--<?php echo $fa['estado'] == 'pagada' ? 'success' : 'warning'; ?>">
+                                            <?php echo ucfirst($fa['estado']); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                            <?php if ($fa['estado'] == 'pagada'): ?>
+                                                <a href="<?php echo URL_ROOT; ?>/admin/facturas/recibo?id_factura=<?php echo $fa['id_factura']; ?>" target="_blank" class="btn--pdf" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; line-height: 1; min-height: auto; font-weight: 500;">Ver PDF</a>
+                                            <?php else: ?>
+                                                <span style="font-size: 11px; color: #a0b098;">—</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="5" style="text-align:center; color:#607050; padding:40px;">No hay facturas</td>
+                                <td colspan="7" style="text-align:center; color:#607050; padding:40px;">No hay facturas</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -470,15 +506,15 @@
                     <tbody>
                         <?php if (!empty($inventario_all)): ?>
                             <?php foreach ($inventario_all as $inv): ?>
-                                <tr style="cursor:pointer;" onclick="openPropertyModalFromData({
-                        desc: '<?php echo addslashes($inv['descripcion'] ?? ''); ?>',
-                        price: '<?php echo number_format($inv['precio'], 0, ',', '.'); ?>',
-                        beds: '<?php echo $inv['habitaciones'] ?? '0'; ?>',
-                        baths: '<?php echo $inv['banos'] ?? '0'; ?>',
-                        area: '<?php echo $inv['area_m2'] ?? '0'; ?>',
-                        phone: '',
-                        images: '<?php echo addslashes($inv['fotos'] ?? '[]'); ?>'
-                    })">
+                                <tr style="cursor:pointer;" onclick="openPropertyModal(this)"
+                                    data-id="<?php echo $inv['id_inmueble']; ?>"
+                                    data-desc="<?php echo htmlspecialchars($inv['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-price="<?php echo number_format($inv['precio'], 0, ',', '.'); ?>"
+                                    data-beds="<?php echo $inv['habitaciones'] ?? '0'; ?>"
+                                    data-baths="<?php echo $inv['banos'] ?? '0'; ?>"
+                                    data-area="<?php echo $inv['area_m2'] ?? '0'; ?>"
+                                    data-phone=""
+                                    data-images="<?php echo htmlspecialchars($inv['fotos'] ?? '[]', ENT_QUOTES, 'UTF-8'); ?>">
                                     <td><?php echo ucfirst($inv['tipo_inmueble']) . ' - ' . htmlspecialchars($inv['direccion']); ?>
                                     </td>
                                     <td><?php echo ucfirst($inv['tipo']); ?></td>
@@ -562,6 +598,20 @@
         let currentModalImages = [];
         let currentImageIndex = 0;
 
+        function openPropertyModal(card) {
+            const data = {
+                id: card.getAttribute('data-id'),
+                desc: card.getAttribute('data-desc'),
+                price: card.getAttribute('data-price'),
+                beds: card.getAttribute('data-beds'),
+                baths: card.getAttribute('data-baths'),
+                area: card.getAttribute('data-area'),
+                phone: card.getAttribute('data-phone'),
+                images: card.getAttribute('data-images')
+            };
+            openPropertyModalFromData(data);
+        }
+
         function openPropertyModalFromData(data) {
             const modal = document.getElementById('propertyModal');
             document.body.style.overflow = 'hidden';
@@ -571,6 +621,27 @@
             document.getElementById('modalBaths').textContent = data.baths || '0';
             document.getElementById('modalArea').textContent = data.area || '0';
             document.getElementById('modalPrice').textContent = '$' + data.price;
+
+            const btnEdit = document.getElementById('modalEdit');
+            if (btnEdit) {
+                if (data.id) {
+                    btnEdit.href = '<?php echo URL_ROOT; ?>/admin/inmuebles/editar?id=' + data.id;
+                    btnEdit.style.display = 'inline-flex';
+                } else {
+                    btnEdit.style.display = 'none';
+                }
+            }
+            
+            const btnDelete = document.getElementById('modalDelete');
+            const formDelete = document.getElementById('modalDeleteForm');
+            if (btnDelete && formDelete) {
+                if (data.id) {
+                    document.getElementById('modalDeleteId').value = data.id;
+                    formDelete.style.display = 'flex';
+                } else {
+                    formDelete.style.display = 'none';
+                }
+            }
 
             const waButton = document.getElementById('modalWhatsapp');
             if (waButton) {
@@ -595,7 +666,7 @@
             if (!Array.isArray(currentModalImages) || currentModalImages.length === 0) {
                 currentModalImages = ['<?php echo URL_ROOT; ?>/assets/img/logo.png'];
             } else {
-                currentModalImages = currentModalImages.map(img => '<?php echo URL_ROOT; ?>/' + img);
+                currentModalImages = currentModalImages.map(img => img.startsWith('http') ? img : '<?php echo URL_ROOT; ?>/' + img);
             }
             currentImageIndex = 0;
             updateModalImage();
@@ -670,9 +741,13 @@
                         <div class="modal-feature"><span id="modalBaths"></span> Baños</div>
                         <div class="modal-feature"><span id="modalArea"></span> m2</div>
                     </div>
-                    <div class="property-modal__cta">
-                        <a id="modalWhatsapp" href="#" target="_blank" class="btn btn--outline btn--whatsapp">Contactar
-                            Agente</a>
+                    <div class="property-modal__cta" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; margin-bottom: 24px;">
+                        <a id="modalWhatsapp" href="#" target="_blank" class="btn--whatsapp" style="flex: 1;">Contactar Agente</a>
+                        <a id="modalEdit" href="#" class="btn--edit" style="flex: 1;">Editar Inmueble</a>
+                        <form id="modalDeleteForm" action="<?php echo URL_ROOT; ?>/admin/inmuebles/eliminar" method="POST" style="margin: 0; flex: 1; display: flex;">
+                            <input type="hidden" name="id_inmueble" id="modalDeleteId" value="">
+                            <button id="modalDelete" type="button" onclick="if(confirm('¿Estás seguro de eliminar este inmueble?')) document.getElementById('modalDeleteForm').submit();" class="btn--delete" style="flex: 1; width: 100%;">Eliminar</button>
+                        </form>
                     </div>
                     <div class="property-modal__price-wrapper">
                         <div id="modalPrice" class="property-modal__price"></div>

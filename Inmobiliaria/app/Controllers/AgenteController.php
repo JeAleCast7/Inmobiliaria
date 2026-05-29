@@ -67,7 +67,7 @@ class AgenteController extends BaseController
         $stmt->execute([$id_agente]);
         $data['reservas'] = $stmt->fetchAll();
 
-        // Get clients for payment enablement
+        // Get clients for payment enablement and reservations
         $stmt = $this->db->query("SELECT id_cliente, nombre, numero_documento FROM clientes");
         $data['clientes'] = $stmt->fetchAll();
 
@@ -109,5 +109,57 @@ class AgenteController extends BaseController
 
         header("Location: " . URL_ROOT . "/agente/dashboard?msg=pago_habilitado");
         exit;
+    }
+
+    public function storeReserva()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return $this->redirect('/agente/dashboard');
+        }
+
+        $id_usuario = $_SESSION['id_usuario'];
+        $stmtAgent = $this->db->prepare("SELECT id_agente FROM agentes WHERE id_usuario = ?");
+        $stmtAgent->execute([$id_usuario]);
+        $agente = $stmtAgent->fetch();
+        if (!$agente) die("Agente no encontrado.");
+        $id_agente = $agente['id_agente'];
+
+        $id_cliente  = $_POST['id_cliente']  ?? null;
+        $id_inmueble = $_POST['id_inmueble'] ?? null;
+        // datetime-local envía formato "YYYY-MM-DDTHH:MM"; MySQL necesita "YYYY-MM-DD HH:MM:SS"
+        $fecha_visita = null;
+        if (!empty($_POST['fecha_visita'])) {
+            $dt = \DateTime::createFromFormat('Y-m-d\TH:i', $_POST['fecha_visita']);
+            if ($dt) {
+                $fecha_visita = $dt->format('Y-m-d H:i:s');
+            }
+        }
+
+        if (!$id_cliente || !$id_inmueble) {
+            header("Location: " . URL_ROOT . "/agente/dashboard?msg=reserva_error");
+            exit;
+        }
+
+        // Verificar que el inmueble exista
+        $stmtCheck = $this->db->prepare("SELECT id_inmueble FROM inmuebles WHERE id_inmueble = ?");
+        $stmtCheck->execute([$id_inmueble]);
+        if (!$stmtCheck->fetch()) {
+            header("Location: " . URL_ROOT . "/agente/dashboard?msg=reserva_error");
+            exit;
+        }
+
+        try {
+            $stmtInsert = $this->db->prepare(
+                "INSERT INTO reservas (id_cliente, id_inmueble, id_agente, estado, fecha_visita) VALUES (?, ?, ?, 'pendiente', ?)"
+            );
+            $stmtInsert->execute([$id_cliente, $id_inmueble, $id_agente, $fecha_visita]);
+
+            header("Location: " . URL_ROOT . "/agente/dashboard?msg=reserva_creada");
+            exit;
+        } catch (\Exception $e) {
+            error_log("[storeReserva] Error: " . $e->getMessage());
+            header("Location: " . URL_ROOT . "/agente/dashboard?msg=reserva_error");
+            exit;
+        }
     }
 }

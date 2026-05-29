@@ -10,7 +10,10 @@
 
 <div style="text-align: center;" class="receipt-print-hide">
     <button class="receipt-btn-print" onclick="window.print()">🖨️ Guardar PDF / Imprimir</button>
-    <a href="<?php echo URL_ROOT; ?>/cliente/dashboard" class="receipt-btn-back">← Volver al inicio</a>
+    <?php 
+    $backUrl = ($_SESSION['rol'] ?? '') === 'admin' ? URL_ROOT . '/admin/dashboard' : URL_ROOT . '/cliente/dashboard';
+    ?>
+    <a href="<?php echo $backUrl; ?>" class="receipt-btn-back">← Volver al inicio</a>
 </div>
 
 <div class="receipt-container">
